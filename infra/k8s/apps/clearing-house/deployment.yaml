@@ -1,0 +1,71 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: clearing-house
+  namespace: showcase
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: clearing-house
+  template:
+    metadata:
+      labels:
+        app: clearing-house
+    spec:
+      containers:
+        - name: clearing-house
+          image: quay.io/acaglio/clearing-house:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8080
+          env:
+            - name: JAVA_TOOL_OPTIONS
+              value: "-javaagent:/opt/otel/opentelemetry-javaagent.jar"
+            - name: OTEL_TRACES_EXPORTER
+              value: "otlp"
+            - name: OTEL_EXPORTER_OTLP_PROTOCOL
+              value: "grpc"
+            - name: OTEL_EXPORTER_OTLP_ENDPOINT
+              value: "http://otel-collector:4317"
+            - name: OTEL_METRICS_EXPORTER
+              value: "none"
+            - name: OTEL_LOGS_EXPORTER
+              value: "none"
+            - name: OTEL_PROPAGATORS
+              value: "tracecontext,baggage"
+            - name: OTEL_SERVICE_NAME
+              value: "clearing-house"
+            - name: IBM_MQ_HOST
+              value: "ibmmq"
+            - name: IBM_MQ_PORT
+              value: "1414"
+            - name: IBM_MQ_QUEUE_MANAGER
+              value: "QM1"
+            - name: IBM_MQ_CHANNEL
+              value: "DEV.APP.SVRCONN"
+            - name: IBM_MQ_QUEUE_NAME
+              value: "DEV.QUEUE.CLEARING"
+            - name: KAFKA_BOOTSTRAP_SERVERS
+              value: "redpanda:9092"
+            - name: QUARKUS_HTTP_PORT
+              value: "8080"
+          readinessProbe:
+            httpGet:
+              path: /q/health/ready
+              port: 8080
+            initialDelaySeconds: 30
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /q/health/live
+              port: 8080
+            initialDelaySeconds: 60
+            periodSeconds: 15
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "100m"
+            limits:
+              memory: "512Mi"
+              cpu: "500m"

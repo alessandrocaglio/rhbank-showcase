@@ -1,0 +1,56 @@
+spring:
+  application:
+    name: transaction-engine
+  datasource:
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/ledger_db}
+    username: ${SPRING_DATASOURCE_USERNAME:appuser}
+    password: ${SPRING_DATASOURCE_PASSWORD:apppassword}
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+  kafka:
+    bootstrap-servers: ${SPRING_KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
+    consumer:
+      group-id: ${SPRING_KAFKA_CONSUMER_GROUP_ID:transaction-engine-group}
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+
+ibm:
+  mq:
+    conn-name: ${IBM_MQ_CONN_NAME:localhost(1414)}
+    queue-manager: ${IBM_MQ_QUEUE_MANAGER:QM1}
+    channel: ${IBM_MQ_CHANNEL:DEV.APP.SVRCONN}
+    user: ${IBM_MQ_USER:}
+    password: ${IBM_MQ_PASSWORD:}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      probes:
+        enabled: true
+
+server:
+  port: ${SERVER_PORT:8080}
+
+app:
+  kafka:
+    topics:
+      payment-approved: ${APP_KAFKA_TOPICS_PAYMENT_APPROVED:payment-approved}
+      payment-approved-dlt: ${APP_KAFKA_TOPICS_PAYMENT_APPROVED_DLT:payment-approved.DLT}
+  mq:
+    queues:
+      clearing: ${APP_MQ_QUEUES_CLEARING:DEV.QUEUE.CLEARING}
+      dead-letter: ${APP_MQ_QUEUES_DEAD_LETTER:DEV.DEAD.LETTER.QUEUE}

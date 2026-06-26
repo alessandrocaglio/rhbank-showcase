@@ -1,0 +1,30 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: postgres-init-config
+  namespace: showcase
+  labels:
+    app: postgres
+data:
+  init.sql: |
+    -- =============================================================================
+    -- postgres-init.sql
+    -- Runs once on first PostgreSQL container start (docker-entrypoint-initdb.d).
+    -- Creates application databases, shared app user, and grants required privileges.
+    -- =============================================================================
+
+    CREATE DATABASE accounts_db;
+    CREATE DATABASE ledger_db;
+
+    CREATE USER appuser WITH PASSWORD 'apppassword';
+
+    GRANT ALL PRIVILEGES ON DATABASE accounts_db TO appuser;
+    GRANT ALL PRIVILEGES ON DATABASE ledger_db TO appuser;
+
+    -- Required for Flyway schema management in accounts_db
+    \c accounts_db;
+    GRANT ALL ON SCHEMA public TO appuser;
+
+    -- Required for Flyway schema management in ledger_db
+    \c ledger_db;
+    GRANT ALL ON SCHEMA public TO appuser;

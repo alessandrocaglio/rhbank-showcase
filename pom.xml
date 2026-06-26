@@ -1,0 +1,183 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>com.showcase</groupId>
+    <artifactId>showcase-parent</artifactId>
+    <version>1.0.0-SNAPSHOT</version>
+    <packaging>pom</packaging>
+
+    <name>Observability Showcase — Parent</name>
+    <description>Polyglot microservice distributed tracing showcase (Spring Boot + Quarkus)</description>
+
+    <modules>
+        <module>apps/grpc-api</module>
+        <module>apps/payment-gateway</module>
+        <module>apps/account-verifier</module>
+        <module>apps/transaction-engine</module>
+        <module>apps/clearing-house</module>
+    </modules>
+
+    <properties>
+        <!-- Compiler — Java 21 API level, compiled with JDK 21+ -->
+        <maven.compiler.release>21</maven.compiler.release>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+
+        <!-- Framework versions (imported per child POM to avoid BOM conflicts) -->
+        <spring-boot.version>3.3.5</spring-boot.version>
+        <quarkus.platform.version>3.15.1</quarkus.platform.version>
+
+        <!-- gRPC / Protobuf (used by grpc-api + gateway client) -->
+        <grpc.version>1.66.0</grpc.version>
+        <protobuf.version>3.25.3</protobuf.version>
+        <protobuf-maven-plugin.version>0.6.1</protobuf-maven-plugin.version>
+        <os-maven-plugin.version>1.7.1</os-maven-plugin.version>
+
+        <!-- Plugin versions -->
+        <maven-compiler-plugin.version>3.13.0</maven-compiler-plugin.version>
+        <maven-surefire-plugin.version>3.3.1</maven-surefire-plugin.version>
+        <maven-failsafe-plugin.version>3.3.1</maven-failsafe-plugin.version>
+        <jacoco.version>0.8.12</jacoco.version>
+        <jib.version>3.4.3</jib.version>
+
+        <!-- Coverage threshold applied to every child module -->
+        <jacoco.minimum.coverage>0.80</jacoco.minimum.coverage>
+    </properties>
+
+    <!--
+        NOTE: Spring Boot BOM and Quarkus BOM are intentionally NOT imported here.
+        They conflict on shared artifacts (Jackson, Netty, gRPC, etc.).
+        Each child POM imports only its own framework BOM.
+    -->
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>io.grpc</groupId>
+                <artifactId>grpc-bom</artifactId>
+                <version>${grpc.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            <dependency>
+                <groupId>com.google.protobuf</groupId>
+                <artifactId>protobuf-bom</artifactId>
+                <version>${protobuf.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
+    <build>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-compiler-plugin</artifactId>
+                    <version>${maven-compiler-plugin.version}</version>
+                    <configuration>
+                        <release>21</release>
+                        <!-- Preserves parameter names for Spring reflection and gRPC -->
+                        <parameters>true</parameters>
+                    </configuration>
+                </plugin>
+
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-surefire-plugin</artifactId>
+                    <version>${maven-surefire-plugin.version}</version>
+                </plugin>
+
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-failsafe-plugin</artifactId>
+                    <version>${maven-failsafe-plugin.version}</version>
+                </plugin>
+
+                <plugin>
+                    <groupId>org.jacoco</groupId>
+                    <artifactId>jacoco-maven-plugin</artifactId>
+                    <version>${jacoco.version}</version>
+                </plugin>
+
+                <!--
+                    Jib: containerises Java services without a local Docker daemon.
+                    Each child POM configures its own <to><image> name.
+                    The shared base image and registry are set here.
+                -->
+                <plugin>
+                    <groupId>com.google.cloud.tools</groupId>
+                    <artifactId>jib-maven-plugin</artifactId>
+                    <version>${jib.version}</version>
+                    <configuration>
+                        <from>
+                            <image>registry.access.redhat.com/ubi9/openjdk-21-runtime:latest</image>
+                        </from>
+                        <container>
+                            <environment>
+                                <JAVA_TOOL_OPTIONS>-javaagent:/opt/otel/opentelemetry-javaagent.jar</JAVA_TOOL_OPTIONS>
+                            </environment>
+                        </container>
+                    </configuration>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+
+        <!--
+            Plugins listed here are active in EVERY child module.
+            JaCoCo is enforced globally — each module must meet 80% line coverage.
+        -->
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+            </plugin>
+
+            <plugin>
+                <groupId>org.jacoco</groupId>
+                <artifactId>jacoco-maven-plugin</artifactId>
+                <executions>
+                    <!-- Instruments the JVM before Surefire runs tests -->
+                    <execution>
+                        <id>jacoco-prepare-agent</id>
+                        <goals>
+                            <goal>prepare-agent</goal>
+                        </goals>
+                    </execution>
+                    <!-- Enforces coverage in the verify phase (runs after test) -->
+                    <execution>
+                        <id>jacoco-check</id>
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>check</goal>
+                        </goals>
+                        <configuration>
+                            <rules>
+                                <rule>
+                                    <element>BUNDLE</element>
+                                    <limits>
+                                        <limit>
+                                            <counter>LINE</counter>
+                                            <value>COVEREDRATIO</value>
+                                            <minimum>${jacoco.minimum.coverage}</minimum>
+                                        </limit>
+                                    </limits>
+                                </rule>
+                            </rules>
+                            <excludes>
+                                <!-- Protobuf/gRPC generated classes -->
+                                <exclude>com/showcase/grpc/**</exclude>
+                                <!-- Framework entry points have no testable logic -->
+                                <exclude>**/*Application.class</exclude>
+                                <exclude>**/*Application$*.class</exclude>
+                            </excludes>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+</project>

@@ -1,0 +1,45 @@
+# =============================================================================
+# OTel Collector — Reference Configuration
+#
+# NOTE: This file is a REFERENCE GUIDE for the infrastructure team.
+# On OpenShift with the Red Hat OpenTelemetry Operator, deploy an
+# OpenTelemetryCollector CR instead of this manual configuration.
+#
+# All Java services point OTEL_EXPORTER_OTLP_ENDPOINT to the Collector
+# at grpc://otel-collector:4317 (not directly to Grafana Tempo).
+# =============================================================================
+
+receivers:
+  otlp:
+    protocols:
+      grpc:
+        endpoint: 0.0.0.0:4317
+      http:
+        endpoint: 0.0.0.0:4318
+
+processors:
+  batch:
+    timeout: 1s
+    send_batch_size: 1024
+  memory_limiter:
+    limit_mib: 400
+    spike_limit_mib: 100
+    check_interval: 5s
+
+exporters:
+  otlp/tempo:
+    endpoint: tempo:4317    # Grafana Tempo gRPC endpoint
+    tls:
+      insecure: true
+  logging:
+    verbosity: detailed     # For debugging only — remove in production
+
+service:
+  pipelines:
+    traces:
+      receivers: [otlp]
+      processors: [memory_limiter, batch]
+      exporters: [otlp/tempo]
+  telemetry:
+    logs:
+      level: warn

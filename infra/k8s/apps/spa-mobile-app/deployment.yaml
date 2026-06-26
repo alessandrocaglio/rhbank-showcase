@@ -1,0 +1,49 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: spa-mobile-app
+  namespace: showcase
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: spa-mobile-app
+  template:
+    metadata:
+      labels:
+        app: spa-mobile-app
+    spec:
+      containers:
+        - name: spa-mobile-app
+          image: quay.io/acaglio/spa-mobile-app:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 80
+          env:
+            - name: KEYCLOAK_URL
+              value: "https://keycloak-showcase.apps.<cluster-domain>"
+            - name: KEYCLOAK_REALM
+              value: "BankDemoRealm"
+            - name: KEYCLOAK_CLIENT_ID
+              value: "spa-payment-client"
+            - name: API_BASE_URL
+              value: "https://payment-gateway-showcase.apps.<cluster-domain>"
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 80
+            initialDelaySeconds: 5
+            periodSeconds: 5
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 80
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          resources:
+            requests:
+              memory: "64Mi"
+              cpu: "50m"
+            limits:
+              memory: "128Mi"
+              cpu: "100m"

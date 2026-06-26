@@ -1,0 +1,53 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: redpanda-topic-init
+  namespace: showcase
+  labels:
+    app: redpanda
+spec:
+  backoffLimit: 3
+  template:
+    metadata:
+      labels:
+        app: redpanda-topic-init
+    spec:
+      restartPolicy: Never
+      initContainers:
+        - name: wait-for-redpanda
+          image: docker.redpanda.com/redpandadata/redpanda:v24.2.7
+          imagePullPolicy: IfNotPresent
+          command:
+            - sh
+            - -c
+            - |
+              until rpk cluster health --brokers redpanda:9092; do
+                echo "Waiting for Redpanda to be ready..."
+                sleep 5
+              done
+          resources:
+            requests:
+              memory: "64Mi"
+              cpu: "50m"
+            limits:
+              memory: "128Mi"
+              cpu: "100m"
+      containers:
+        - name: topic-init
+          image: docker.redpanda.com/redpandadata/redpanda:v24.2.7
+          imagePullPolicy: IfNotPresent
+          command:
+            - sh
+            - -c
+            - |
+              rpk topic create payment-approved --partitions 3 --replicas 1 --brokers redpanda:9092;
+              rpk topic create payment-completed --partitions 3 --replicas 1 --brokers redpanda:9092;
+              rpk topic create payment-approved.DLT --partitions 1 --replicas 1 --brokers redpanda:9092;
+              rpk topic create payment-completed.DLT --partitions 1 --replicas 1 --brokers redpanda:9092;
+          resources:
+            requests:
+              memory: "64Mi"
+              cpu: "50m"
+            limits:
+              memory: "128Mi"
+              cpu: "100m"

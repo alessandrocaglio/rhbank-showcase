@@ -1,0 +1,72 @@
+# ─── Maven ───────────────────────────────────────────────────────────────────
+target/
+!.mvn/wrapper/maven-wrapper.jar
+!**/src/main/**/target/
+!**/src/test/**/target/
+
+# ─── Quarkus ─────────────────────────────────────────────────────────────────
+**/.quarkus/
+**/quarkus-app/
+
+# ─── Spring Boot ─────────────────────────────────────────────────────────────
+HELP.md
+spring-shell.log
+
+# ─── Node / Vue / Vite (apps/spa-mobile-app) ─────────────────────────────────
+node_modules/
+dist/
+.vite/
+*.local
+apps/spa-mobile-app/public/config.js
+
+# ─── Coverage & test reports ─────────────────────────────────────────────────
+**/jacoco-report/
+**/jacoco.exec
+**/jacoco-quarkus.exec
+**/surefire-reports/
+**/failsafe-reports/
+coverage/
+.nyc_output/
+
+# ─── IDEs ────────────────────────────────────────────────────────────────────
+.idea/
+*.iml
+*.iws
+*.ipr
+.vscode/
+*.code-workspace
+*.swp
+*.swo
+.project
+.classpath
+.settings/
+.factorypath
+
+# ─── OS ──────────────────────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ─── Docker / Compose ────────────────────────────────────────────────────────
+docker-compose.override.yml
+
+# ─── Secrets & local config ──────────────────────────────────────────────────
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.jks
+
+# ─── Logs ────────────────────────────────────────────────────────────────────
+*.log
+logs/
+
+# ─── Jib image cache ─────────────────────────────────────────────────────────
+.jib/
+
+# ─── Claude / AI tooling ─────────────────────────────────────────────────────
+.claude/worktrees/
+.claude/jobs/
+.claude/plans/

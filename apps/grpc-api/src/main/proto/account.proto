@@ -1,0 +1,29 @@
+syntax = "proto3";
+
+package com.showcase.grpc.account;
+
+option java_package = "com.showcase.grpc.account";
+option java_outer_classname = "AccountProto";
+option java_multiple_files = true;
+
+// AccountService is exposed by account-verifier (Quarkus gRPC server).
+// payment-gateway (Spring Boot) calls it as a blocking gRPC client.
+service AccountService {
+  // Verifies that the source account has sufficient balance and is active.
+  // On approval, the balance hold is applied atomically in accounts_db.
+  rpc VerifyAccount (VerifyAccountRequest) returns (VerifyAccountResponse);
+}
+
+message VerifyAccountRequest {
+  string transaction_id      = 1;
+  string source_account      = 2;
+  string destination_account = 3;
+  double amount              = 4;
+  string currency            = 5;
+}
+
+message VerifyAccountResponse {
+  bool   approved = 1;
+  // Human-readable reason — populated on rejection, empty on approval.
+  string reason   = 2;
+}

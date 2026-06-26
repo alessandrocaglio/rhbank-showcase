@@ -1,0 +1,79 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: ibmmq
+  namespace: showcase
+  labels:
+    app: ibmmq
+spec:
+  serviceName: ibmmq
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ibmmq
+  template:
+    metadata:
+      labels:
+        app: ibmmq
+    spec:
+      containers:
+        - name: ibmmq
+          image: icr.io/ibm-mq/mq:9.3.5.1-r2
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: mq-listener
+              containerPort: 1414
+              protocol: TCP
+            - name: web-console
+              containerPort: 9443
+              protocol: TCP
+          env:
+            - name: LICENSE
+              value: accept
+            - name: MQ_QMGR_NAME
+              value: QM1
+            - name: MQ_ADMIN_PASSWORD
+              value: admin
+            - name: MQ_APP_PASSWORD
+              value: ""
+            - name: MQ_ENABLE_METRICS
+              value: "false"
+          volumeMounts:
+            - name: ibmmq-data
+              mountPath: /mnt/mqm
+            - name: mqsc-config
+              mountPath: /etc/mqm/config.mqsc
+              subPath: config.mqsc
+              readOnly: true
+          readinessProbe:
+            exec:
+              command:
+                - dspmq
+                - -m
+                - QM1
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            failureThreshold: 6
+          livenessProbe:
+            exec:
+              command:
+                - dspmq
+                - -m
+                - QM1
+            initialDelaySeconds: 60
+            periodSeconds: 20
+            failureThreshold: 4
+          resources:
+            requests:
+              memory: "512Mi"
+              cpu: "250m"
+            limits:
+              memory: "1Gi"
+              cpu: "1000m"
+      volumes:
+        - name: ibmmq-data
+          persistentVolumeClaim:
+            claimName: ibmmq-data
+        - name: mqsc-config
+          configMap:
+            name: ibmmq-mqsc-config

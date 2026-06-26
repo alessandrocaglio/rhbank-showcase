@@ -1,0 +1,143 @@
+version: "3.9"
+
+networks:
+  showcase-net:
+    driver: bridge
+
+services:
+
+  # ---------------------------------------------------------------------------
+  # Keycloak — Identity Provider
+  # ---------------------------------------------------------------------------
+  keycloak:
+    image: quay.io/keycloak/keycloak:latest
+    command: start-dev --import-realm
+    environment:
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin
+      KC_HTTP_PORT: "8080"
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./payment-realm.json:/opt/keycloak/data/import/BankDemoRealm-realm.json:ro
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health/ready"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+      start_period: 60s
+    networks:
+      - showcase-net
+
+  # ---------------------------------------------------------------------------
+  # PostgreSQL — Shared relational database host
+  # ---------------------------------------------------------------------------
+  postgres:
+    image: docker.io/library/postgres:16-alpine
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgrespassword
+      POSTGRES_DB: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./postgres-init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    networks:
+      - showcase-net
+
+  # ---------------------------------------------------------------------------
+  # Redpanda — Kafka-compatible event streaming
+  # ---------------------------------------------------------------------------
+  redpanda:
+    image: docker.io/redpandadata/redpanda:latest-fips
+    command:
+      - redpanda
+      - start
+      - --mode
+      - dev-container
+      # INTERNAL listener: container-to-container (redpanda-init, future app containers)
+      # EXTERNAL listener: host-to-container (Java services running on the host)
+      - --kafka-addr
+      - INTERNAL://0.0.0.0:29092,EXTERNAL://0.0.0.0:9092
+      - --advertise-kafka-addr
+      - INTERNAL://redpanda:29092,EXTERNAL://localhost:9092
+      - --schema-registry-addr
+      - http://0.0.0.0:8081
+      - --pandaproxy-addr
+      - http://0.0.0.0:8082
+      - --rpc-addr
+      - redpanda:33145
+      - --advertise-rpc-addr
+      - redpanda:33145
+    ports:
+      - "9092:9092"
+      - "8081:8081"
+      - "9644:9644"
+    volumes:
+      - redpanda-data:/var/lib/redpanda/data
+    healthcheck:
+      test: ["CMD", "rpk", "cluster", "health"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+    networks:
+      - showcase-net
+
+  # ---------------------------------------------------------------------------
+  # redpanda-init — One-shot topic creation job
+  # ---------------------------------------------------------------------------
+  redpanda-init:
+    image: docker.io/redpandadata/redpanda:latest-fips
+    depends_on:
+      redpanda:
+        condition: service_healthy
+    entrypoint: >
+      bash -c "
+        rpk topic create payment-approved --partitions 3 --replicas 1 --brokers redpanda:29092;
+        rpk topic create payment-completed --partitions 3 --replicas 1 --brokers redpanda:29092;
+        rpk topic create payment-approved.DLT --partitions 1 --replicas 1 --brokers redpanda:29092;
+        rpk topic create payment-completed.DLT --partitions 1 --replicas 1 --brokers redpanda:29092;
+      "
+    restart: "no"
+    networks:
+      - showcase-net
+
+  # ---------------------------------------------------------------------------
+  # IBM MQ — Enterprise JMS message broker
+  # ---------------------------------------------------------------------------
+  ibmmq:
+    image: docker.io/ibmcom/mq:latest
+    environment:
+      LICENSE: accept
+      MQ_QMGR_NAME: QM1
+      MQ_ADMIN_PASSWORD: admin
+    ports:
+      - "1414:1414"
+      - "9443:9443"
+    volumes:
+      - ./config.mqsc:/etc/mqm/config.mqsc:ro
+      - ibmmq-data:/mnt/mqm
+    healthcheck:
+      test: ["CMD", "dspmq", "-m", "QM1"]
+      interval: 10s
+      timeout: 5s
+      retries: 15
+      start_period: 45s
+    networks:
+      - showcase-net
+
+  # IBM MQ commented out — image requires ICR authentication (icr.io/ibm-mq/mq:9.3.5.1-r2).
+  # Re-enable after: podman login icr.io && podman pull icr.io/ibm-mq/mq:9.3.5.1-r2
+  # ibmmq: ...
+
+volumes:
+  postgres-data:
+  redpanda-data:
+  ibmmq-data:

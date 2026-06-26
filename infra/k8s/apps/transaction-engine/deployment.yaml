@@ -1,0 +1,81 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: transaction-engine
+  namespace: showcase
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: transaction-engine
+  template:
+    metadata:
+      labels:
+        app: transaction-engine
+    spec:
+      containers:
+        - name: transaction-engine
+          image: quay.io/acaglio/transaction-engine:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8080
+          env:
+            - name: JAVA_TOOL_OPTIONS
+              value: "-javaagent:/opt/otel/opentelemetry-javaagent.jar"
+            - name: OTEL_TRACES_EXPORTER
+              value: "otlp"
+            - name: OTEL_EXPORTER_OTLP_PROTOCOL
+              value: "grpc"
+            - name: OTEL_EXPORTER_OTLP_ENDPOINT
+              value: "http://otel-collector:4317"
+            - name: OTEL_METRICS_EXPORTER
+              value: "none"
+            - name: OTEL_LOGS_EXPORTER
+              value: "none"
+            - name: OTEL_PROPAGATORS
+              value: "tracecontext,baggage"
+            - name: OTEL_SERVICE_NAME
+              value: "transaction-engine"
+            - name: SPRING_DATASOURCE_URL
+              value: "jdbc:postgresql://postgres:5432/ledger_db"
+            - name: SPRING_DATASOURCE_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-app-secret
+                  key: username
+            - name: SPRING_DATASOURCE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-app-secret
+                  key: password
+            - name: SPRING_KAFKA_BOOTSTRAP_SERVERS
+              value: "redpanda:9092"
+            - name: SPRING_KAFKA_CONSUMER_GROUP_ID
+              value: "transaction-engine-group"
+            - name: IBM_MQ_CONN_NAME
+              value: "ibmmq(1414)"
+            - name: IBM_MQ_QUEUE_MANAGER
+              value: "QM1"
+            - name: IBM_MQ_CHANNEL
+              value: "DEV.APP.SVRCONN"
+            - name: APP_MQ_QUEUES_CLEARING
+              value: "DEV.QUEUE.CLEARING"
+          readinessProbe:
+            httpGet:
+              path: /actuator/health/readiness
+              port: 8080
+            initialDelaySeconds: 40
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /actuator/health/liveness
+              port: 8080
+            initialDelaySeconds: 90
+            periodSeconds: 15
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "100m"
+            limits:
+              memory: "512Mi"
+              cpu: "500m"

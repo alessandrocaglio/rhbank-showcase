@@ -1,0 +1,20 @@
+* =============================================================================
+* config.mqsc — IBM MQ Queue Manager startup script for QM1
+* Mounted to /etc/mqm/config.mqsc and executed automatically on container start.
+* Configures the server-connection channel, queues, dead-letter queue,
+* and disables channel authentication for local development.
+* =============================================================================
+
+DEFINE CHANNEL(DEV.APP.SVRCONN) CHLTYPE(SVRCONN) TRPTYPE(TCP) REPLACE
+
+DEFINE QLOCAL(DEV.QUEUE.CLEARING) REPLACE
+
+DEFINE QLOCAL(DEV.DEAD.LETTER.QUEUE) REPLACE
+
+ALTER QMGR DEADQ(DEV.DEAD.LETTER.QUEUE)
+
+ALTER QMGR CHLAUTH(DISABLED)
+
+ALTER AUTHINFO(SYSTEM.DEFAULT.AUTHINFO.IDPWOS) AUTHTYPE(IDPWOS) ADOPTCTX(YES) CHCKCLNT(OPTIONAL) CHCKLOCL(OPTIONAL) AUTHENMD(OS)
+
+REFRESH SECURITY TYPE(CONNAUTH)
