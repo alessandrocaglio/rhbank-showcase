@@ -59,6 +59,11 @@
             <groupId>org.flywaydb</groupId>
             <artifactId>flyway-core</artifactId>
         </dependency>
+        <!-- Flyway 10.x moved PostgreSQL support to a separate module -->
+        <dependency>
+            <groupId>org.flywaydb</groupId>
+            <artifactId>flyway-database-postgresql</artifactId>
+        </dependency>
 
         <!-- PostgreSQL driver (runtime only — not needed at compile time) -->
         <dependency>

@@ -6,6 +6,7 @@ import io.opentelemetry.api.trace.Span;
 import io.opentelemetry.api.trace.StatusCode;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import jakarta.transaction.Transactional;
 import org.eclipse.microprofile.reactive.messaging.Channel;
 import org.eclipse.microprofile.reactive.messaging.Emitter;
 
@@ -24,6 +25,7 @@ public class PaymentEventPublisherImpl implements PaymentEventPublisher {
     }
 
     @Override
+    @Transactional(Transactional.TxType.NOT_SUPPORTED)
     public void publishApproved(PaymentApprovedEvent event) {
         try {
             String json = objectMapper.writeValueAsString(event);
