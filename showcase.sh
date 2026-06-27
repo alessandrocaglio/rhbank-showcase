@@ -88,8 +88,87 @@ cmd_restart() {
 # ── Status / Logs ─────────────────────────────────────────────────────────────
 
 cmd_status() {
-  step "Container status"
-  DC ps
+  step "Stack Status"
+
+  # Get all container statuses in one call
+  local ps_output
+  ps_output=$(podman ps --all --format '{{.Names}}\t{{.Status}}' 2>/dev/null) || true
+
+  # Helper: look up a container's status string
+  get_status() {
+    echo "$ps_output" | grep "^$1"$'\t' | cut -f2
+  }
+
+  # Helper: pick icon based on status string
+  status_icon() {
+    local s="$1"
+    if [[ "$s" == *"(healthy)"* ]]; then
+      echo "🟢"
+    elif [[ "$s" == *"(unhealthy)"* ]] || [[ "$s" == *"Exited"* ]] || [[ -z "$s" ]]; then
+      echo "🔴"
+    else
+      echo "🟡"
+    fi
+  }
+
+  # Print one service row: CONTAINER_NAME LABEL [URL]
+  print_svc() {
+    local name="$1" label="$2" url="${3:-}"
+    local sts icon
+    sts=$(get_status "$name")
+    icon=$(status_icon "$sts")
+    local display="${sts:-not running}"
+    if [[ -n "$url" ]]; then
+      printf "  %s  %-22s %-38s %s\n" "$icon" "$label" "$display" "$url"
+    else
+      printf "  %s  %-22s %s\n" "$icon" "$label" "$display"
+    fi
+  }
+
+  # Counters
+  local healthy=0 starting=0 unhealthy=0 stopped=0
+
+  count_status() {
+    local s
+    s=$(get_status "$1")
+    if [[ "$s" == *"(healthy)"* ]]; then
+      (( healthy++ )) || true
+    elif [[ "$s" == *"(unhealthy)"* ]] || [[ "$s" == *"Exited"* ]]; then
+      (( unhealthy++ )) || true
+    elif [[ -z "$s" ]]; then
+      (( stopped++ )) || true
+    else
+      (( starting++ )) || true
+    fi
+  }
+
+  echo ""
+  echo -e "  ${BLD}Infrastructure${NC}"
+  print_svc docker_keycloak_1  "Keycloak"         "http://localhost:8080"
+  print_svc docker_postgres_1  "PostgreSQL"       ""
+  print_svc docker_redpanda_1  "Redpanda (Kafka)" ""
+  print_svc docker_ibmmq_1     "IBM MQ"           "https://localhost:9443/ibmmq/console"
+
+  echo ""
+  echo -e "  ${BLD}Application Services${NC}"
+  print_svc docker_account-verifier_1   "account-verifier"   "http://localhost:8085/q/health"
+  print_svc docker_transaction-engine_1 "transaction-engine"  ""
+  print_svc docker_clearing-house_1     "clearing-house"     "http://localhost:8083/q/health"
+  print_svc docker_payment-gateway_1    "payment-gateway"    "http://localhost:8090/actuator/health"
+  print_svc docker_spa-mobile-app_1     "spa-mobile-app"     "http://localhost:3000"
+
+  # Tally totals
+  for c in docker_keycloak_1 docker_postgres_1 docker_redpanda_1 docker_ibmmq_1 \
+            docker_account-verifier_1 docker_transaction-engine_1 \
+            docker_clearing-house_1 docker_payment-gateway_1 docker_spa-mobile-app_1; do
+    count_status "$c"
+  done
+
+  echo ""
+  echo -e "  ${GRN}${healthy} healthy${NC} · ${YEL}${starting} starting${NC} · ${RED}${unhealthy} unhealthy${NC} · ${RED}${stopped} stopped${NC}"
+  echo ""
+  echo -e "  Browser: ${BLD}http://localhost:3000${NC}  (testuser / password)"
+  echo ""
 }
 
 cmd_logs() {
