@@ -1,11 +1,18 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import { useKeycloak } from '../composables/useKeycloak.js'
 
+const { isAuthenticated } = useKeycloak()
+
 const routes = [
   { path: '/', redirect: '/login' },
   {
     path: '/login',
     component: () => import('../views/LoginView.vue'),
+  },
+  {
+    path: '/dashboard',
+    component: () => import('../views/DashboardView.vue'),
+    meta: { requiresAuth: true },
   },
   {
     path: '/payments',
@@ -25,9 +32,8 @@ const router = createRouter({
 })
 
 router.beforeEach((to) => {
-  if (to.meta.requiresAuth) {
-    const { isAuthenticated } = useKeycloak()
-    if (!isAuthenticated.value) return '/login'
+  if (to.meta.requiresAuth && !isAuthenticated.value) {
+    return '/login'
   }
 })
 

@@ -13,25 +13,33 @@ const username = ref('')
 
 export function useKeycloak() {
   async function init() {
-    const authenticated = await keycloak.init({
-      onLoad: 'check-sso',
-      checkLoginIframe: false,
-    })
-    isAuthenticated.value = authenticated
-    if (authenticated) {
-      username.value = keycloak.tokenParsed?.preferred_username || ''
+    try {
+      const authenticated = await keycloak.init({
+        onLoad: 'check-sso',
+        checkLoginIframe: false,
+        pkceMethod: 'S256',
+      })
+      isAuthenticated.value = authenticated
+      if (authenticated) {
+        username.value = keycloak.tokenParsed?.preferred_username || ''
+      }
+      keycloak.onTokenExpired = () =>
+        keycloak.updateToken(30).catch(() => {
+          isAuthenticated.value = false
+          keycloak.logout({ redirectUri: window.location.origin + '/login' })
+        })
+    } catch (e) {
+      console.error('Keycloak init failed', e)
     }
-    keycloak.onTokenExpired = () =>
-      keycloak.updateToken(30).catch(() => keycloak.logout())
-    return authenticated
   }
 
   function login() {
-    return keycloak.login()
+    return keycloak.login({ redirectUri: window.location.origin + '/dashboard' })
   }
 
   function logout() {
-    return keycloak.logout()
+    isAuthenticated.value = false
+    return keycloak.logout({ redirectUri: window.location.origin + '/login' })
   }
 
   function getToken() {

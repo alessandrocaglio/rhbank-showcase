@@ -23,7 +23,7 @@ describe('PaymentsView', () => {
       global: { stubs: { BottomNav: true, AppHeader: true } }
     })
 
-    await wrapper.find('input[placeholder="e.g. ACC-001"]').setValue('ACC-001')
+    await wrapper.find('select#source-account').setValue('ACC-001')
     await wrapper.find('input[placeholder="e.g. ACC-002"]').setValue('ACC-002')
     await wrapper.find('input[type="number"]').setValue('150')
     await wrapper.find('button').trigger('click')

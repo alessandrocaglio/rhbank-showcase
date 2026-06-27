@@ -4,19 +4,20 @@
       <h2 class="payment-title">Send Money</h2>
 
       <div class="form-group">
-        <label>Source Account</label>
-        <input
-          v-model="form.sourceAccount"
-          class="input-field"
-          placeholder="e.g. ACC-001"
-        />
+        <label for="source-account">Source Account</label>
+        <select id="source-account" v-model="form.sourceAccount" class="input-field">
+          <option value="ACC-001">ACC-001</option>
+          <option value="ACC-002">ACC-002</option>
+        </select>
         <span v-if="errors.sourceAccount" class="field-error">{{ errors.sourceAccount }}</span>
       </div>
 
       <div class="form-group">
-        <label>Destination Account</label>
+        <label for="destination-account">Destination Account</label>
         <input
+          id="destination-account"
           v-model="form.destinationAccount"
+          type="text"
           class="input-field"
           placeholder="e.g. ACC-002"
         />
@@ -24,8 +25,9 @@
       </div>
 
       <div class="form-group">
-        <label>Amount</label>
+        <label for="amount">Amount</label>
         <input
+          id="amount"
           v-model="form.amount"
           type="number"
           min="0.01"
@@ -37,8 +39,8 @@
       </div>
 
       <div class="form-group">
-        <label>Currency</label>
-        <select v-model="form.currency" class="input-field">
+        <label for="currency">Currency</label>
+        <select id="currency" v-model="form.currency" class="input-field">
           <option value="USD">USD</option>
           <option value="EUR">EUR</option>
           <option value="GBP">GBP</option>
@@ -78,25 +80,64 @@ const { form, errors, isLoading, errorMessage, submit } = usePayment()
 
 <style scoped>
 .payments-wrapper {
-  padding: 1.5rem 1rem;
+  padding: 1.5rem;
   display: flex;
   flex-direction: column;
   gap: 1rem;
+  flex: 1;
 }
-.payment-card { max-width: 400px; margin: 0 auto; width: 100%; }
+
+.payment-card {
+  max-width: 400px;
+  margin: 0 auto;
+  width: 100%;
+}
+
 .payment-title {
-  color: var(--color-primary);
+  color: var(--primary-color);
   text-align: center;
   font-size: 1.5rem;
   margin-bottom: 1.5rem;
 }
-.form-group { margin-bottom: 1.5rem; display: flex; flex-direction: column; gap: 0.4rem; }
-.form-group label { font-weight: 500; font-size: 0.9rem; }
-.field-error { font-size: 0.75rem; color: var(--color-primary); }
-.radio-group { display: flex; gap: 1rem; }
-.radio-label { display: flex; align-items: center; gap: 0.4rem; font-weight: 400; }
+
+.form-group {
+  margin-bottom: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.form-group label {
+  font-weight: 500;
+  font-size: 0.9rem;
+  margin-bottom: 0;
+}
+
+.field-error {
+  font-size: 0.75rem;
+  color: var(--primary-color);
+}
+
+.radio-group {
+  display: flex;
+  gap: 1rem;
+}
+
+.radio-label {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-weight: 400;
+  margin-bottom: 0;
+}
+
+.radio-label input[type="radio"] {
+  width: auto;
+  margin: 0;
+}
+
 .api-error {
-  color: var(--color-primary);
+  color: var(--primary-color);
   font-size: 0.85rem;
   margin-bottom: 1rem;
   text-align: center;

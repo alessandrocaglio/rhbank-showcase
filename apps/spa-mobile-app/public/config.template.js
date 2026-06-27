@@ -1,6 +1,6 @@
 window.__APP_CONFIG__ = {
-  keycloakUrl: '__KEYCLOAK_URL__',
-  keycloakRealm: '__KEYCLOAK_REALM__',
-  keycloakClientId: '__KEYCLOAK_CLIENT_ID__',
-  apiBaseUrl: '__API_BASE_URL__',
+  keycloakUrl: '${KEYCLOAK_URL}',
+  keycloakRealm: '${KEYCLOAK_REALM}',
+  keycloakClientId: '${KEYCLOAK_CLIENT_ID}',
+  apiBaseUrl: '${API_BASE_URL}',
 }
