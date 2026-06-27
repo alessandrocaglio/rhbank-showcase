@@ -21,10 +21,10 @@ services:
     volumes:
       - ./payment-realm.json:/opt/keycloak/data/import/BankDemoRealm-realm.json:ro
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8080/health/ready"]
-      interval: 15s
-      timeout: 5s
-      retries: 10
+      test: ["CMD-SHELL", "exec 3<>/dev/tcp/localhost/8080 && printf 'GET /realms/BankDemoRealm HTTP/1.0\\r\\nHost: localhost\\r\\n\\r\\n' >&3 && timeout 3 cat <&3 | grep -q realm"]
+      interval: 10s
+      timeout: 10s
+      retries: 15
       start_period: 60s
     networks:
       - showcase-net
@@ -61,8 +61,8 @@ services:
       - start
       - --mode
       - dev-container
-      # INTERNAL listener: container-to-container (redpanda-init, future app containers)
-      # EXTERNAL listener: host-to-container (Java services running on the host)
+      # INTERNAL listener: container-to-container
+      # EXTERNAL listener: host-to-container (smoke tests, debugging)
       - --kafka-addr
       - INTERNAL://0.0.0.0:29092,EXTERNAL://0.0.0.0:9092
       - --advertise-kafka-addr
@@ -113,7 +113,7 @@ services:
   # IBM MQ — Enterprise JMS message broker
   # ---------------------------------------------------------------------------
   ibmmq:
-    image: docker.io/ibmcom/mq:latest
+    image: icr.io/ibm-messaging/mq:9.3.5.1-r2
     environment:
       LICENSE: accept
       MQ_QMGR_NAME: QM1
@@ -133,9 +133,165 @@ services:
     networks:
       - showcase-net
 
-  # IBM MQ commented out — image requires ICR authentication (icr.io/ibm-mq/mq:9.3.5.1-r2).
-  # Re-enable after: podman login icr.io && podman pull icr.io/ibm-mq/mq:9.3.5.1-r2
-  # ibmmq: ...
+  # ---------------------------------------------------------------------------
+  # account-verifier — Quarkus gRPC server + Kafka producer
+  # ---------------------------------------------------------------------------
+  account-verifier:
+    build:
+      context: ../../apps/account-verifier
+      dockerfile: Dockerfile
+    image: showcase/account-verifier:latest
+    environment:
+      QUARKUS_HTTP_PORT: "8080"
+      QUARKUS_GRPC_SERVER_PORT: "9090"
+      QUARKUS_DATASOURCE_JDBC_URL: jdbc:postgresql://postgres:5432/accounts_db
+      QUARKUS_DATASOURCE_USERNAME: appuser
+      QUARKUS_DATASOURCE_PASSWORD: apppassword
+      KAFKA_BOOTSTRAP_SERVERS: redpanda:29092
+    ports:
+      - "8085:8080"   # HTTP health / metrics
+      - "9090:9090"   # gRPC
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redpanda:
+        condition: service_healthy
+      redpanda-init:
+        condition: service_completed_successfully
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/q/health/live"]
+      interval: 10s
+      timeout: 5s
+      retries: 15
+      start_period: 30s
+    networks:
+      - showcase-net
+
+  # ---------------------------------------------------------------------------
+  # transaction-engine — Spring Boot Kafka consumer + IBM MQ producer
+  # ---------------------------------------------------------------------------
+  transaction-engine:
+    build:
+      context: ../../apps/transaction-engine
+      dockerfile: Dockerfile
+    image: showcase/transaction-engine:latest
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/ledger_db
+      SPRING_DATASOURCE_USERNAME: appuser
+      SPRING_DATASOURCE_PASSWORD: apppassword
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: redpanda:29092
+      IBM_MQ_CONN_NAME: ibmmq(1414)
+      IBM_MQ_QUEUE_MANAGER: QM1
+      IBM_MQ_CHANNEL: DEV.APP.SVRCONN
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redpanda:
+        condition: service_healthy
+      redpanda-init:
+        condition: service_completed_successfully
+      ibmmq:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "kill -0 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+    networks:
+      - showcase-net
+
+  # ---------------------------------------------------------------------------
+  # clearing-house — Quarkus IBM MQ consumer + Kafka producer
+  # ---------------------------------------------------------------------------
+  clearing-house:
+    build:
+      context: ../../apps/clearing-house
+      dockerfile: Dockerfile
+    image: showcase/clearing-house:latest
+    environment:
+      QUARKUS_HTTP_PORT: "8080"
+      IBM_MQ_HOST: ibmmq
+      IBM_MQ_PORT: "1414"
+      IBM_MQ_QUEUE_MANAGER: QM1
+      IBM_MQ_CHANNEL: DEV.APP.SVRCONN
+      IBM_MQ_QUEUE_NAME: DEV.QUEUE.CLEARING
+      KAFKA_BOOTSTRAP_SERVERS: redpanda:29092
+    ports:
+      - "8083:8080"   # Quarkus health
+    depends_on:
+      redpanda:
+        condition: service_healthy
+      redpanda-init:
+        condition: service_completed_successfully
+      ibmmq:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/q/health/live"]
+      interval: 10s
+      timeout: 5s
+      retries: 15
+      start_period: 30s
+    networks:
+      - showcase-net
+
+  # ---------------------------------------------------------------------------
+  # payment-gateway — Spring Boot edge API (gRPC client, Kafka, SSE)
+  # ---------------------------------------------------------------------------
+  payment-gateway:
+    build:
+      context: ../../apps/payment-gateway
+      dockerfile: Dockerfile
+    image: showcase/payment-gateway:latest
+    environment:
+      SERVER_PORT: "8090"
+      # Tokens are issued with iss=http://localhost:8080 (browser-visible URL);
+      # JWKS keys are fetched from the internal container hostname.
+      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI: http://localhost:8080/realms/BankDemoRealm
+      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK_SET_URI: http://keycloak:8080/realms/BankDemoRealm/protocol/openid-connect/certs
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: redpanda:29092
+      GRPC_CLIENT_ACCOUNT_VERIFIER_ADDRESS: static://account-verifier:9090
+    ports:
+      - "8090:8090"
+    depends_on:
+      keycloak:
+        condition: service_healthy
+      account-verifier:
+        condition: service_healthy
+      redpanda:
+        condition: service_healthy
+      redpanda-init:
+        condition: service_completed_successfully
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8090/actuator/health/liveness"]
+      interval: 10s
+      timeout: 5s
+      retries: 15
+      start_period: 30s
+    networks:
+      - showcase-net
+
+  # ---------------------------------------------------------------------------
+  # spa-mobile-app — Vue 3 frontend served by Nginx
+  # ---------------------------------------------------------------------------
+  spa-mobile-app:
+    build:
+      context: ../../apps/spa-mobile-app
+      dockerfile: Dockerfile
+    image: showcase/spa-mobile-app:latest
+    environment:
+      # These are browser-visible URLs (resolved by the user's browser, not by containers)
+      KEYCLOAK_URL: http://localhost:8080
+      KEYCLOAK_REALM: BankDemoRealm
+      KEYCLOAK_CLIENT_ID: spa-payment-client
+      API_BASE_URL: http://localhost:8090
+    ports:
+      - "3000:80"
+    depends_on:
+      payment-gateway:
+        condition: service_healthy
+    networks:
+      - showcase-net
 
 volumes:
   postgres-data:

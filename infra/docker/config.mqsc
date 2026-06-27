@@ -5,7 +5,7 @@
 * and disables channel authentication for local development.
 * =============================================================================
 
-DEFINE CHANNEL(DEV.APP.SVRCONN) CHLTYPE(SVRCONN) TRPTYPE(TCP) MCAUSER('mqm') REPLACE
+DEFINE CHANNEL(DEV.APP.SVRCONN) CHLTYPE(SVRCONN) TRPTYPE(TCP) MCAUSER('app') REPLACE
 
 DEFINE QLOCAL(DEV.QUEUE.CLEARING) REPLACE
 
