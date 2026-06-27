@@ -46,5 +46,14 @@ export function useKeycloak() {
     return keycloak.token
   }
 
-  return { init, login, logout, getToken, isAuthenticated, username }
+  async function refreshToken(minValiditySeconds = 30) {
+    try {
+      await keycloak.updateToken(minValiditySeconds)
+    } catch (_) {
+      // refresh failed — session expired; redirect to login
+      keycloak.login()
+    }
+  }
+
+  return { init, login, logout, getToken, isAuthenticated, username, refreshToken }
 }

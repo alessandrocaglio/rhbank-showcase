@@ -2,7 +2,8 @@ import { useKeycloak } from '../composables/useKeycloak.js'
 import { config } from '../config.js'
 
 export async function initiatePayment(payload) {
-  const { getToken } = useKeycloak()
+  const { getToken, refreshToken } = useKeycloak()
+  await refreshToken(30)   // ensure token has at least 30 s left
   const res = await fetch(`${config.apiBaseUrl}/api/v1/payments`, {
     method: 'POST',
     headers: {

@@ -18,14 +18,14 @@ class AccountProtoTest {
                 .setTransactionId("txn-001")
                 .setSourceAccount("ACC-001")
                 .setDestinationAccount("ACC-002")
-                .setAmount(150.00)
+                .setAmount("150.00")
                 .setCurrency("USD")
                 .build();
 
         assertEquals("txn-001", request.getTransactionId());
         assertEquals("ACC-001", request.getSourceAccount());
         assertEquals("ACC-002", request.getDestinationAccount());
-        assertEquals(150.00, request.getAmount(), 0.001);
+        assertEquals("150.00", request.getAmount());
         assertEquals("USD", request.getCurrency());
     }
 

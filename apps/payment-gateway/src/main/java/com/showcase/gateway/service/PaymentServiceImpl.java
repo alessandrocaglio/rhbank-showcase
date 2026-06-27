@@ -34,7 +34,7 @@ public class PaymentServiceImpl implements PaymentService {
                 .setTransactionId(transactionId)
                 .setSourceAccount(request.sourceAccount())
                 .setDestinationAccount(request.destinationAccount())
-                .setAmount(request.amount().doubleValue())
+                .setAmount(request.amount().toPlainString())
                 .setCurrency(request.currency())
                 .build();
 

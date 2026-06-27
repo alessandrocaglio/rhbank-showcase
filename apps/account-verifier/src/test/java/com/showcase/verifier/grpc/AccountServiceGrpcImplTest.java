@@ -57,7 +57,7 @@ class AccountServiceGrpcImplTest {
     }
 
     private VerifyAccountRequest buildRequest(String txId, String source, String destination,
-                                              double amount, String currency) {
+                                              String amount, String currency) {
         return VerifyAccountRequest.newBuilder()
                 .setTransactionId(txId)
                 .setSourceAccount(source)
@@ -74,7 +74,7 @@ class AccountServiceGrpcImplTest {
                 any(BigDecimal.class), eq("USD")))
                 .thenReturn(VerificationResult.ofApproved());
 
-        impl.verifyAccount(buildRequest("TXN-001", "ACC-001", "ACC-002", 100.0, "USD"),
+        impl.verifyAccount(buildRequest("TXN-001", "ACC-001", "ACC-002", "100.00", "USD"),
                 responseObserver);
 
         var captor = org.mockito.ArgumentCaptor.forClass(VerifyAccountResponse.class);
@@ -93,7 +93,7 @@ class AccountServiceGrpcImplTest {
                 any(BigDecimal.class), eq("EUR")))
                 .thenReturn(VerificationResult.ofRejected("Insufficient balance"));
 
-        impl.verifyAccount(buildRequest("TXN-002", "ACC-003", "ACC-001", 500.0, "EUR"),
+        impl.verifyAccount(buildRequest("TXN-002", "ACC-003", "ACC-001", "500.00", "EUR"),
                 responseObserver);
 
         var captor = org.mockito.ArgumentCaptor.forClass(VerifyAccountResponse.class);
@@ -110,7 +110,7 @@ class AccountServiceGrpcImplTest {
         when(verificationService.verify(any(), any(), any(), any(), any()))
                 .thenThrow(new RuntimeException("Unexpected DB error"));
 
-        impl.verifyAccount(buildRequest("TXN-003", "ACC-001", "ACC-002", 10.0, "USD"),
+        impl.verifyAccount(buildRequest("TXN-003", "ACC-001", "ACC-002", "10.00", "USD"),
                 responseObserver);
 
         verify(responseObserver).onError(any());

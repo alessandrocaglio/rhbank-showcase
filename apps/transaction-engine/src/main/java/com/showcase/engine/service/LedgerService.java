@@ -24,29 +24,32 @@ public class LedgerService {
 
     public TransactionLedger persistLedgerRecord(PaymentApprovedEvent event) {
         MDC.put("transactionId", event.transactionId());
+        try {
+            Optional<TransactionLedger> existing = repository.findByTransactionId(event.transactionId());
+            if (existing.isPresent()) {
+                log.warn("Duplicate payment-approved for txId={}, reusing existing ledger record", event.transactionId());
+                return existing.get();
+            }
 
-        Optional<TransactionLedger> existing = repository.findByTransactionId(event.transactionId());
-        if (existing.isPresent()) {
-            log.warn("Duplicate payment-approved for txId={}, reusing existing ledger record", event.transactionId());
-            return existing.get();
+            log.info("Persisting ledger record for transaction {}", event.transactionId());
+
+            TransactionLedger ledger = TransactionLedger.create(
+                    event.transactionId(),
+                    event.sourceAccount(),
+                    event.destinationAccount(),
+                    event.amount(),
+                    event.currency(),
+                    "PENDING");
+
+            TransactionLedger saved = repository.save(ledger);
+
+            Span.current().setAttribute("bank.payment.transaction_id", event.transactionId());
+            Span.current().setAttribute("bank.ledger.record_id", saved.getTransactionId());
+
+            log.info("Ledger record persisted for transaction {}", saved.getTransactionId());
+            return saved;
+        } finally {
+            MDC.remove("transactionId");
         }
-
-        log.info("Persisting ledger record for transaction {}", event.transactionId());
-
-        TransactionLedger ledger = TransactionLedger.create(
-                event.transactionId(),
-                event.sourceAccount(),
-                event.destinationAccount(),
-                event.amount(),
-                event.currency(),
-                "PENDING");
-
-        TransactionLedger saved = repository.save(ledger);
-
-        Span.current().setAttribute("bank.payment.transaction_id", event.transactionId());
-        Span.current().setAttribute("bank.ledger.record_id", saved.getTransactionId());
-
-        log.info("Ledger record persisted for transaction {}", saved.getTransactionId());
-        return saved;
     }
 }

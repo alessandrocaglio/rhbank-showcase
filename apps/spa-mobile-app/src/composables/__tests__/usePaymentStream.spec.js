@@ -78,6 +78,26 @@ describe('usePaymentStream', () => {
     expect(es.closed).toBe(true)
   })
 
+  it('calls cleanup when COMPLETED status is received', async () => {
+    const { usePaymentStream } = await import('../usePaymentStream.js')
+    usePaymentStream('txn-006')
+    const es = MockEventSource.instances[0]
+
+    es.onmessage({ data: JSON.stringify({ status: 'COMPLETED', detail: 'Payment settled' }) })
+
+    expect(es.closed).toBe(true)
+  })
+
+  it('calls cleanup when FAILED status is received', async () => {
+    const { usePaymentStream } = await import('../usePaymentStream.js')
+    usePaymentStream('txn-007')
+    const es = MockEventSource.instances[0]
+
+    es.onmessage({ data: JSON.stringify({ status: 'FAILED', detail: 'Insufficient funds' }) })
+
+    expect(es.closed).toBe(true)
+  })
+
   it('sets CONNECTION_LOST after max retries', async () => {
     const { usePaymentStream } = await import('../usePaymentStream.js')
     const { status } = usePaymentStream('txn-005')

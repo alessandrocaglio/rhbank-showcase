@@ -18,7 +18,7 @@ message VerifyAccountRequest {
   string transaction_id      = 1;
   string source_account      = 2;
   string destination_account = 3;
-  double amount              = 4;
+  string amount              = 4;   // decimal string, e.g. "100.00" — avoids IEEE 754 precision loss
   string currency            = 5;
 }
 

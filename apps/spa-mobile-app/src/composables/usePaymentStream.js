@@ -25,6 +25,10 @@ export function usePaymentStream(txId) {
         const data = JSON.parse(event.data)
         if (data.status) status.value = data.status
         if (data.detail) detail.value = data.detail
+
+        if (data.status === 'COMPLETED' || data.status === 'FAILED') {
+          cleanup()   // server is done — close immediately, no browser reconnect
+        }
       } catch {
         // malformed message — ignore
       }

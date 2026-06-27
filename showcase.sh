@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # showcase.sh — single-command control for the observability showcase stack
-# Usage: ./showcase.sh {build|start|stop|restart|status|logs|smoke}
+# Usage: ./showcase.sh {build|start|stop|restart|status|logs|smoke|test}
 
 set -euo pipefail
 IFS=$'\n\t'
@@ -214,6 +214,97 @@ cmd_smoke() {
   fi
 }
 
+# ── Test ──────────────────────────────────────────────────────────────────────
+
+cmd_test() {
+  local module="${1:-}"
+
+  # Map of friendly name → Maven module path (or "spa" for npm)
+  declare -A MODULE_MAP=(
+    [grpc-api]="apps/grpc-api"
+    [account-verifier]="apps/account-verifier"
+    [payment-gateway]="apps/payment-gateway"
+    [transaction-engine]="apps/transaction-engine"
+    [clearing-house]="apps/clearing-house"
+    [spa]="__spa__"
+    [spa-mobile-app]="__spa__"
+  )
+
+  # ── Single-module mode ────────────────────────────────────────────────────
+  if [[ -n "$module" ]]; then
+    if [[ -z "${MODULE_MAP[$module]+x}" ]]; then
+      fail "Unknown module: '$module'"
+      echo "  Valid names: grpc-api, account-verifier, payment-gateway, transaction-engine, clearing-house, spa" >&2
+      exit 1
+    fi
+
+    local target="${MODULE_MAP[$module]}"
+    step "Running tests — $module"
+
+    if [[ "$target" == "__spa__" ]]; then
+      log "Testing spa-mobile-app..."
+      if (cd "$SCRIPT_DIR/apps/spa-mobile-app" && npm test 2>/dev/null); then
+        ok "spa-mobile-app — passed"
+      else
+        fail "spa-mobile-app — FAILED"
+        (cd "$SCRIPT_DIR/apps/spa-mobile-app" && npm test 2>&1) | tail -20
+        exit 1
+      fi
+    else
+      log "Testing $module..."
+      if JAVA_HOME="$JAVA_HOME" "$MVNW" test -pl "$target" -q 2>/dev/null; then
+        ok "$module — passed"
+      else
+        fail "$module — FAILED"
+        JAVA_HOME="$JAVA_HOME" "$MVNW" test -pl "$target" 2>&1 | grep -E "FAIL|ERROR|Tests run" | tail -20
+        exit 1
+      fi
+    fi
+    return 0
+  fi
+
+  # ── All-modules mode ──────────────────────────────────────────────────────
+  step "Running tests"
+
+  local java_modules=("apps/grpc-api" "apps/account-verifier" "apps/payment-gateway" "apps/transaction-engine" "apps/clearing-house")
+  local java_labels=("grpc-api" "account-verifier" "payment-gateway" "transaction-engine" "clearing-house")
+  local passed=0
+  local failed_modules=()
+
+  for i in "${!java_modules[@]}"; do
+    local mod="${java_modules[$i]}"
+    local label="${java_labels[$i]}"
+    log "Testing $label..."
+    if JAVA_HOME="$JAVA_HOME" "$MVNW" test -pl "$mod" -q 2>/dev/null; then
+      ok "$label — passed"
+      (( passed++ )) || true
+    else
+      fail "$label — FAILED"
+      failed_modules+=("$label")
+      JAVA_HOME="$JAVA_HOME" "$MVNW" test -pl "$mod" 2>&1 | grep -E "FAIL|ERROR|Tests run" | tail -20
+    fi
+  done
+
+  log "Testing spa-mobile-app..."
+  if (cd "$SCRIPT_DIR/apps/spa-mobile-app" && npm test 2>/dev/null); then
+    ok "spa-mobile-app — passed"
+    (( passed++ )) || true
+  else
+    fail "spa-mobile-app — FAILED"
+    failed_modules+=("spa-mobile-app")
+    (cd "$SCRIPT_DIR/apps/spa-mobile-app" && npm test 2>&1) | tail -20
+  fi
+
+  echo ""
+  if [[ ${#failed_modules[@]} -eq 0 ]]; then
+    ok "All tests passed ($passed modules)"
+    return 0
+  else
+    fail "${#failed_modules[@]} module(s) failed: ${failed_modules[*]}"
+    return 1
+  fi
+}
+
 # ── Dispatch ──────────────────────────────────────────────────────────────────
 case "${1:-help}" in
   build)   cmd_build   ;;
@@ -223,6 +314,7 @@ case "${1:-help}" in
   status)  cmd_status  ;;
   logs)    cmd_logs "${2:-}" ;;
   smoke)   cmd_smoke   ;;
+  test)    cmd_test "${2:-}"   ;;
   help|*)
     echo ""
     echo -e "  ${BLD}showcase.sh${NC} — observability showcase control script"
@@ -237,6 +329,7 @@ case "${1:-help}" in
     echo "    status          Show container status"
     echo "    logs [service]  Tail logs (all services, or a specific one)"
     echo "    smoke           End-to-end curl smoke test"
+    echo "    test [module]   Run unit tests (all modules, or one: account-verifier, payment-gateway, etc.)"
     echo ""
     echo "  Service names for 'logs': account-verifier, transaction-engine,"
     echo "    clearing-house, payment-gateway, spa-mobile-app, keycloak, ..."

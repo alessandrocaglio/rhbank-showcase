@@ -1,7 +1,7 @@
 {
   "type": "excalidraw",
   "version": 2,
-  "source": "https://excalidraw.com",
+  "source": "https://marketplace.visualstudio.com/items?itemName=pomdtr.excalidraw-editor",
   "elements": [
     {
       "id": "seq-title",
@@ -22,11 +22,11 @@
       "frameId": null,
       "roundness": null,
       "seed": 5001,
-      "version": 1,
-      "versionNonce": 5001,
+      "version": 2,
+      "versionNonce": 1546991721,
       "isDeleted": false,
       "boundElements": [],
-      "updated": 1700000000000,
+      "updated": 1782602803103,
       "link": null,
       "locked": false,
       "text": "Red Hat Bank — Payment Transaction Sequence Diagram",
@@ -38,7 +38,8 @@
       "containerId": null,
       "originalText": "Red Hat Bank — Payment Transaction Sequence Diagram",
       "lineHeight": 1.25,
-      "autoResize": true
+      "autoResize": true,
+      "index": "a0"
     },
     {
       "id": "act-spa",
@@ -57,15 +58,23 @@
       "opacity": 100,
       "groupIds": [],
       "frameId": null,
-      "roundness": {"type": 3},
+      "roundness": {
+        "type": 3
+      },
       "seed": 5002,
-      "version": 1,
-      "versionNonce": 5002,
+      "version": 2,
+      "versionNonce": 388472487,
       "isDeleted": false,
-      "boundElements": [{"type": "text", "id": "act-spa-t"}],
-      "updated": 1700000000000,
+      "boundElements": [
+        {
+          "type": "text",
+          "id": "act-spa-t"
+        }
+      ],
+      "updated": 1782602803103,
       "link": null,
-      "locked": false
+      "locked": false,
+      "index": "a1"
     },
     {
       "id": "act-spa-t",
@@ -86,11 +95,11 @@
       "frameId": null,
       "roundness": null,
       "seed": 5003,
-      "version": 1,
-      "versionNonce": 5003,
+      "version": 2,
+      "versionNonce": 128205641,
       "isDeleted": false,
       "boundElements": [],
-      "updated": 1700000000000,
+      "updated": 1782602803103,
       "link": null,
       "locked": false,
       "text": "Browser / SPA",
@@ -102,7 +111,8 @@
       "containerId": "act-spa",
       "originalText": "Browser / SPA",
       "lineHeight": 1.25,
-      "autoResize": true
+      "autoResize": true,
+      "index": "a2"
     },
     {
       "id": "act-kc",
@@ -121,15 +131,23 @@
       "opacity": 100,
       "groupIds": [],
       "frameId": null,
-      "roundness": {"type": 3},
+      "roundness": {
+        "type": 3
+      },
       "seed": 5004,
-      "version": 1,
-      "versionNonce": 5004,
+      "version": 2,
+      "versionNonce": 1714106823,
       "isDeleted": false,
-      "boundElements": [{"type": "text", "id": "act-kc-t"}],
-      "updated": 1700000000000,
+      "boundElements": [
+        {
+          "type": "text",
+          "id": "act-kc-t"
+        }
+      ],
+      "updated": 1782602803103,
       "link": null,
-      "locked": false
+      "locked": false,
+      "index": "a3"
     },
     {
       "id": "act-kc-t",
@@ -150,11 +168,11 @@
       "frameId": null,
       "roundness": null,
       "seed": 5005,
-      "version": 1,
-      "versionNonce": 5005,
+      "version": 2,
+      "versionNonce": 1252979241,
       "isDeleted": false,
       "boundElements": [],
-      "updated": 1700000000000,
+      "updated": 1782602803103,
       "link": null,
       "locked": false,
       "text": "Keycloak",
@@ -166,7 +184,8 @@
       "containerId": "act-kc",
       "originalText": "Keycloak",
       "lineHeight": 1.25,
-      "autoResize": true
+      "autoResize": true,
+      "index": "a4"
     },
     {
       "id": "act-pg",
@@ -185,15 +204,23 @@
       "opacity": 100,
       "groupIds": [],
       "frameId": null,
-      "roundness": {"type": 3},
+      "roundness": {
+        "type": 3
+      },
       "seed": 5006,
-      "version": 1,
-      "versionNonce": 5006,
+      "version": 2,
+      "versionNonce": 831480039,
       "isDeleted": false,
-      "boundElements": [{"type": "text", "id": "act-pg-t"}],
-      "updated": 1700000000000,
+      "boundElements": [
+        {
+          "type": "text",
+          "id": "act-pg-t"
+        }
+      ],
+      "updated": 1782602803103,
       "link": null,
-      "locked": false
+      "locked": false,
+      "index": "a5"
     },
     {
       "id": "act-pg-t",
@@ -214,11 +241,11 @@
       "frameId": null,
       "roundness": null,
       "seed": 5007,
-      "version": 1,
-      "versionNonce": 5007,
+      "version": 2,
+      "versionNonce": 2051065097,
       "isDeleted": false,
       "boundElements": [],
-      "updated": 1700000000000,
+      "updated": 1782602803103,
       "link": null,
       "locked": false,
       "text": "payment-gateway",
@@ -230,7 +257,8 @@
       "containerId": "act-pg",
       "originalText": "payment-gateway",
       "lineHeight": 1.25,
-      "autoResize": true
+      "autoResize": true,
+      "index": "a6"
     },
     {
       "id": "act-av",
@@ -249,15 +277,23 @@
       "opacity": 100,
       "groupIds": [],
       "frameId": null,
-      "roundness": {"type": 3},
+      "roundness": {
+        "type": 3
+      },
       "seed": 5008,
-      "version": 1,
-      "versionNonce": 5008,
+      "version": 2,
+      "versionNonce": 1524673543,
       "isDeleted": false,
-      "boundElements": [{"type": "text", "id": "act-av-t"}],
-      "updated": 1700000000000,
+      "boundElements": [
+        {
+          "type": "text",
+          "id": "act-av-t"
+        }
+      ],
+      "updated": 1782602803103,
       "link": null,
-      "locked": false
+      "locked": false,
+      "index": "a7"
     },
     {
       "id": "act-av-t",
@@ -278,11 +314,11 @@
       "frameId": null,
       "roundness": null,
       "seed": 5009,
-      "version": 1,
-      "versionNonce": 5009,
+      "version": 2,
+      "versionNonce": 1104493545,
       "isDeleted": false,
       "boundElements": [],
-      "updated": 1700000000000,
+      "updated": 1782602803103,
       "link": null,
       "locked": false,
       "text": "account-verifier",
@@ -294,7 +330,8 @@
       "containerId": "act-av",
       "originalText": "account-verifier",
       "lineHeight": 1.25,
-      "autoResize": true
+      "autoResize": true,
+      "index": "a8"
     },
     {
       "id": "act-kafka",
@@ -313,15 +350,23 @@
       "opacity": 100,
       "groupIds": [],
       "frameId": null,
-      "roundness": {"type": 3},
+      "roundness": {
+        "type": 3
+      },
       "seed": 5010,
-      "version": 1,
-      "versionNonce": 5010,
+      "version": 2,
+      "versionNonce": 1578865447,
       "isDeleted": false,
-      "boundElements": [{"type": "text", "id": "act-kafka-t"}],
-      "updated": 1700000000000,
+      "boundElements": [
+        {
+          "type": "text",
+          "id": "act-kafka-t"
+        }
+      ],
+      "updated": 1782602803103,
       "link": null,
-      "locked": false
+      "locked": false,
+      "index": "a9"
     },
     {
       "id": "act-kafka-t",
@@ -342,11 +387,11 @@
       "frameId": null,
       "roundness": null,
       "seed": 5011,
-      "version": 1,
-      "versionNonce": 5011,
+      "version": 2,
+      "versionNonce": 1366808265,
       "isDeleted": false,
       "boundElements": [],
-      "updated": 1700000000000,
+      "updated": 1782602803103,
       "link": null,
       "locked": false,
       "text": "Redpanda/Kafka",
@@ -358,7 +403,8 @@
       "containerId": "act-kafka",
       "originalText": "Redpanda/Kafka",
       "lineHeight": 1.25,
-      "autoResize": true
+      "autoResize": true,
+      "index": "aA"
     },
     {
       "id": "act-te",
@@ -377,15 +423,23 @@
       "opacity": 100,
       "groupIds": [],
       "frameId": null,
-      "roundness": {"type": 3},
+      "roundness": {
+        "type": 3
+      },
       "seed": 5012,
-      "version": 1,
-      "versionNonce": 5012,
+      "version": 2,
+      "versionNonce": 61642311,
       "isDeleted": false,
-      "boundElements": [{"type": "text", "id": "act-te-t"}],
-      "updated": 1700000000000,
+      "boundElements": [
+        {
+          "type": "text",
+          "id": "act-te-t"
+        }
+      ],
+      "updated": 1782602803103,
       "link": null,
-      "locked": false
+      "locked": false,
+      "index": "aB"
     },
     {
       "id": "act-te-t",
@@ -406,11 +460,11 @@
       "frameId": null,
       "roundness": null,
       "seed": 5013,
-      "version": 1,
-      "versionNonce": 5013,
+      "version": 2,
+      "versionNonce": 1271141801,
       "isDeleted": false,
       "boundElements": [],
-      "updated": 1700000000000,
+      "updated": 1782602803103,
       "link": null,
       "locked": false,
       "text": "transaction-engine",
@@ -422,7 +476,8 @@
       "containerId": "act-te",
       "originalText": "transaction-engine",
       "lineHeight": 1.25,
-      "autoResize": true
+      "autoResize": true,
+      "index": "aC"
     },
     {
       "id": "act-mq",
@@ -441,15 +496,23 @@
       "opacity": 100,
       "groupIds": [],
       "frameId": null,
-      "roundness": {"type": 3},
+      "roundness": {
+        "type": 3
+      },
       "seed": 5014,
-      "version": 1,
-      "versionNonce": 5014,
+      "version": 2,
+      "versionNonce": 1383085415,
       "isDeleted": false,
-      "boundElements": [{"type": "text", "id": "act-mq-t"}],
-      "updated": 1700000000000,
+      "boundElements": [
+        {
+          "type": "text",
+          "id": "act-mq-t"
+        }
+      ],
+      "updated": 1782602803103,
       "link": null,
-      "locked": false
+      "locked": false,
+      "index": "aD"
     },
     {
       "id": "act-mq-t",
@@ -470,11 +533,11 @@
       "frameId": null,
       "roundness": null,
       "seed": 5015,
-      "version": 1,
-      "versionNonce": 5015,
+      "version": 2,
+      "versionNonce": 1944418441,
       "isDeleted": false,
       "boundElements": [],
-      "updated": 1700000000000,
+      "updated": 1782602803103,
       "link": null,
       "locked": false,
       "text": "IBM MQ",
@@ -486,7 +549,8 @@
       "containerId": "act-mq",
       "originalText": "IBM MQ",
       "lineHeight": 1.25,
-      "autoResize": true
+      "autoResize": true,
+      "index": "aE"
     },
     {
       "id": "act-ch",
@@ -505,15 +569,23 @@
       "opacity": 100,
       "groupIds": [],
       "frameId": null,
-      "roundness": {"type": 3},
+      "roundness": {
+        "type": 3
+      },
       "seed": 5016,
-      "version": 1,
-      "versionNonce": 5016,
+      "version": 2,
+      "versionNonce": 1102246023,
       "isDeleted": false,
-      "boundElements": [{"type": "text", "id": "act-ch-t"}],
-      "updated": 1700000000000,
+      "boundElements": [
+        {
+          "type": "text",
+          "id": "act-ch-t"
+        }
+      ],
+      "updated": 1782602803103,
       "link": null,
-      "locked": false
+      "locked": false,
+      "index": "aF"
     },
     {
       "id": "act-ch-t",
@@ -534,11 +606,11 @@
       "frameId": null,
       "roundness": null,
       "seed": 5017,
-      "version": 1,
-      "versionNonce": 5017,
+      "version": 2,
+      "versionNonce": 462913385,
       "isDeleted": false,
       "boundElements": [],
-      "updated": 1700000000000,
+      "updated": 1782602803103,
       "link": null,
       "locked": false,
       "text": "clearing-house",
@@ -550,14 +622,15 @@
       "containerId": "act-ch",
       "originalText": "clearing-house",
       "lineHeight": 1.25,
-      "autoResize": true
+      "autoResize": true,
+      "index": "aG"
     },
     {
       "id": "ll-spa",
       "type": "line",
       "x": 105,
       "y": 115,
-      "width": 1,
+      "width": 0,
       "height": 1320,
       "angle": 0,
       "strokeColor": "#aaaaaa",
@@ -571,26 +644,36 @@
       "frameId": null,
       "roundness": null,
       "seed": 6001,
-      "version": 1,
-      "versionNonce": 6001,
+      "version": 2,
+      "versionNonce": 724649895,
       "isDeleted": false,
       "boundElements": [],
-      "updated": 1700000000000,
+      "updated": 1782602803103,
       "link": null,
       "locked": false,
-      "points": [[0, 0], [0, 1320]],
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          1320
+        ]
+      ],
       "lastCommittedPoint": null,
       "startBinding": null,
       "endBinding": null,
       "startArrowhead": null,
-      "endArrowhead": null
+      "endArrowhead": null,
+      "index": "aH"
     },
     {
       "id": "ll-kc",
       "type": "line",
       "x": 295,
       "y": 115,
-      "width": 1,
+      "width": 0,
       "height": 1320,
       "angle": 0,
       "strokeColor": "#aaaaaa",
@@ -604,26 +687,36 @@
       "frameId": null,
       "roundness": null,
       "seed": 6002,
-      "version": 1,
-      "versionNonce": 6002,
+      "version": 2,
+      "versionNonce": 1361422921,
       "isDeleted": false,
       "boundElements": [],
-      "updated": 1700000000000,
+      "updated": 1782602803103,
       "link": null,
       "locked": false,
-      "points": [[0, 0], [0, 1320]],
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          1320
+        ]
+      ],
       "lastCommittedPoint": null,
       "startBinding": null,
       "endBinding": null,
       "startArrowhead": null,
-      "endArrowhead": null
+      "endArrowhead": null,
+      "index": "aI"
     },
     {
       "id": "ll-pg",
       "type": "line",
       "x": 495,
       "y": 115,
-      "width": 1,
+      "width": 0,
       "height": 1320,
       "angle": 0,
       "strokeColor": "#aaaaaa",
@@ -637,26 +730,36 @@
       "frameId": null,
       "roundness": null,
       "seed": 6003,
-      "version": 1,
-      "versionNonce": 6003,
+      "version": 2,
+      "versionNonce": 2098707143,
       "isDeleted": false,
       "boundElements": [],
-      "updated": 1700000000000,
+      "updated": 1782602803103,
       "link": null,
       "locked": false,
-      "points": [[0, 0], [0, 1320]],
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          1320
+        ]
+      ],
       "lastCommittedPoint": null,
       "startBinding": null,
       "endBinding": null,
       "startArrowhead": null,
-      "endArrowhead": null
+      "endArrowhead": null,
+      "index": "aJ"
     },
     {
       "id": "ll-av",
       "type": "line",
       "x": 705,
       "y": 115,
-      "width": 1,
+      "width": 0,
       "height": 1320,
       "angle": 0,
       "strokeColor": "#aaaaaa",
@@ -670,26 +773,36 @@
       "frameId": null,
       "roundness": null,
       "seed": 6004,
-      "version": 1,
-      "versionNonce": 6004,
+      "version": 2,
+      "versionNonce": 1298889001,
       "isDeleted": false,
       "boundElements": [],
-      "updated": 1700000000000,
+      "updated": 1782602803103,
       "link": null,
       "locked": false,
-      "points": [[0, 0], [0, 1320]],
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          1320
+        ]
+      ],
       "lastCommittedPoint": null,
       "startBinding": null,
       "endBinding": null,
       "startArrowhead": null,
-      "endArrowhead": null
+      "endArrowhead": null,
+      "index": "aK"
     },
     {
       "id": "ll-kafka",
       "type": "line",
       "x": 915,
       "y": 115,
-      "width": 1,
+      "width": 0,
       "height": 1320,
       "angle": 0,
       "strokeColor": "#aaaaaa",
@@ -703,26 +816,36 @@
       "frameId": null,
       "roundness": null,
       "seed": 6005,
-      "version": 1,
-      "versionNonce": 6005,
+      "version": 2,
+      "versionNonce": 738380263,
       "isDeleted": false,
       "boundElements": [],
-      "updated": 1700000000000,
+      "updated": 1782602803103,
       "link": null,
       "locked": false,
-      "points": [[0, 0], [0, 1320]],
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          1320
+        ]
+      ],
       "lastCommittedPoint": null,
       "startBinding": null,
       "endBinding": null,
       "startArrowhead": null,
-      "endArrowhead": null
+      "endArrowhead": null,
+      "index": "aL"
     },
     {
       "id": "ll-te",
       "type": "line",
       "x": 1125,
       "y": 115,
-      "width": 1,
+      "width": 0,
       "height": 1320,
       "angle": 0,
       "strokeColor": "#aaaaaa",
@@ -736,26 +859,36 @@
       "frameId": null,
       "roundness": null,
       "seed": 6006,
-      "version": 1,
-      "versionNonce": 6006,
+      "version": 2,
+      "versionNonce": 567569417,
       "isDeleted": false,
       "boundElements": [],
-      "updated": 1700000000000,
+      "updated": 1782602803103,
       "link": null,
       "locked": false,
-      "points": [[0, 0], [0, 1320]],
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          1320
+        ]
+      ],
       "lastCommittedPoint": null,
       "startBinding": null,
       "endBinding": null,
       "startArrowhead": null,
-      "endArrowhead": null
+      "endArrowhead": null,
+      "index": "aM"
     },
     {
       "id": "ll-mq",
       "type": "line",
       "x": 1325,
       "y": 115,
-      "width": 1,
+      "width": 0,
       "height": 1320,
       "angle": 0,
       "strokeColor": "#aaaaaa",
@@ -769,26 +902,36 @@
       "frameId": null,
       "roundness": null,
       "seed": 6007,
-      "version": 1,
-      "versionNonce": 6007,
+      "version": 2,
+      "versionNonce": 1694430471,
       "isDeleted": false,
       "boundElements": [],
-      "updated": 1700000000000,
+      "updated": 1782602803103,
       "link": null,
       "locked": false,
-      "points": [[0, 0], [0, 1320]],
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          1320
+        ]
+      ],
       "lastCommittedPoint": null,
       "startBinding": null,
       "endBinding": null,
       "startArrowhead": null,
-      "endArrowhead": null
+      "endArrowhead": null,
+      "index": "aN"
     },
     {
       "id": "ll-ch",
       "type": "line",
       "x": 1520,
       "y": 115,
-      "width": 1,
+      "width": 0,
       "height": 1320,
       "angle": 0,
       "strokeColor": "#aaaaaa",
@@ -802,19 +945,29 @@
       "frameId": null,
       "roundness": null,
       "seed": 6008,
-      "version": 1,
-      "versionNonce": 6008,
+      "version": 2,
+      "versionNonce": 643564265,
       "isDeleted": false,
       "boundElements": [],
-      "updated": 1700000000000,
+      "updated": 1782602803103,
       "link": null,
       "locked": false,
-      "points": [[0, 0], [0, 1320]],
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          1320
+        ]
+      ],
       "lastCommittedPoint": null,
       "startBinding": null,
       "endBinding": null,
       "startArrowhead": null,
-      "endArrowhead": null
+      "endArrowhead": null,
+      "index": "aO"
     },
     {
       "id": "msg1",
@@ -822,7 +975,7 @@
       "x": 105,
       "y": 196,
       "width": 190,
-      "height": 2,
+      "height": 0,
       "angle": 0,
       "strokeColor": "#d79b00",
       "backgroundColor": "transparent",
@@ -833,21 +986,33 @@
       "opacity": 100,
       "groupIds": [],
       "frameId": null,
-      "roundness": {"type": 2},
+      "roundness": {
+        "type": 2
+      },
       "seed": 7001,
-      "version": 1,
-      "versionNonce": 7001,
+      "version": 2,
+      "versionNonce": 2139667495,
       "isDeleted": false,
       "boundElements": [],
-      "updated": 1700000000000,
+      "updated": 1782602803103,
       "link": null,
       "locked": false,
-      "points": [[0, 0], [190, 0]],
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          190,
+          0
+        ]
+      ],
       "lastCommittedPoint": null,
       "startBinding": null,
       "endBinding": null,
       "startArrowhead": null,
-      "endArrowhead": "arrow"
+      "endArrowhead": "arrow",
+      "index": "aP"
     },
     {
       "id": "msg1-l",
@@ -868,11 +1033,11 @@
       "frameId": null,
       "roundness": null,
       "seed": 7002,
-      "version": 1,
-      "versionNonce": 7002,
+      "version": 2,
+      "versionNonce": 663600585,
       "isDeleted": false,
       "boundElements": [],
-      "updated": 1700000000000,
+      "updated": 1782602803103,
       "link": null,
       "locked": false,
       "text": "1. Authenticate (OIDC PKCE)",
@@ -884,15 +1049,16 @@
       "containerId": null,
       "originalText": "1. Authenticate (OIDC PKCE)",
       "lineHeight": 1.25,
-      "autoResize": true
+      "autoResize": true,
+      "index": "aQ"
     },
     {
       "id": "msg2",
       "type": "arrow",
-      "x": 105,
+      "x": 295,
       "y": 248,
       "width": 190,
-      "height": 2,
+      "height": 0,
       "angle": 0,
       "strokeColor": "#d79b00",
       "backgroundColor": "transparent",
@@ -903,21 +1069,33 @@
       "opacity": 100,
       "groupIds": [],
       "frameId": null,
-      "roundness": {"type": 2},
+      "roundness": {
+        "type": 2
+      },
       "seed": 7003,
-      "version": 1,
-      "versionNonce": 7003,
+      "version": 2,
+      "versionNonce": 797744967,
       "isDeleted": false,
       "boundElements": [],
-      "updated": 1700000000000,
+      "updated": 1782602803103,
       "link": null,
       "locked": false,
-      "points": [[190, 0], [0, 0]],
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          -190,
+          0
+        ]
+      ],
       "lastCommittedPoint": null,
       "startBinding": null,
       "endBinding": null,
       "startArrowhead": null,
-      "endArrowhead": "arrow"
+      "endArrowhead": "arrow",
+      "index": "aR"
     },
     {
       "id": "msg2-l",
@@ -938,11 +1116,11 @@
       "frameId": null,
       "roundness": null,
       "seed": 7004,
-      "version": 1,
-      "versionNonce": 7004,
+      "version": 2,
+      "versionNonce": 1418009769,
       "isDeleted": false,
       "boundElements": [],
-      "updated": 1700000000000,
+      "updated": 1782602803103,
       "link": null,
       "locked": false,
       "text": "2. JWT access_token",
@@ -954,7 +1132,8 @@
       "containerId": null,
       "originalText": "2. JWT access_token",
       "lineHeight": 1.25,
-      "autoResize": true
+      "autoResize": true,
+      "index": "aS"
     },
     {
       "id": "msg3",
@@ -962,7 +1141,7 @@
       "x": 105,
       "y": 310,
       "width": 390,
-      "height": 2,
+      "height": 0,
       "angle": 0,
       "strokeColor": "#1e1e1e",
       "backgroundColor": "transparent",
@@ -973,21 +1152,33 @@
       "opacity": 100,
       "groupIds": [],
       "frameId": null,
-      "roundness": {"type": 2},
+      "roundness": {
+        "type": 2
+      },
       "seed": 7005,
-      "version": 1,
-      "versionNonce": 7005,
+      "version": 2,
+      "versionNonce": 2003246695,
       "isDeleted": false,
       "boundElements": [],
-      "updated": 1700000000000,
+      "updated": 1782602803103,
       "link": null,
       "locked": false,
-      "points": [[0, 0], [390, 0]],
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          390,
+          0
+        ]
+      ],
       "lastCommittedPoint": null,
       "startBinding": null,
       "endBinding": null,
       "startArrowhead": null,
-      "endArrowhead": "arrow"
+      "endArrowhead": "arrow",
+      "index": "aT"
     },
     {
       "id": "msg3-l",
@@ -1008,11 +1199,11 @@
       "frameId": null,
       "roundness": null,
       "seed": 7006,
-      "version": 1,
-      "versionNonce": 7006,
+      "version": 2,
+      "versionNonce": 1827512201,
       "isDeleted": false,
       "boundElements": [],
-      "updated": 1700000000000,
+      "updated": 1782602803103,
       "link": null,
       "locked": false,
       "text": "3. POST /api/v1/payments  [Authorization: Bearer JWT]",
@@ -1024,7 +1215,8 @@
       "containerId": null,
       "originalText": "3. POST /api/v1/payments  [Authorization: Bearer JWT]",
       "lineHeight": 1.25,
-      "autoResize": true
+      "autoResize": true,
+      "index": "aU"
     },
     {
       "id": "msg4-note",
@@ -1045,11 +1237,11 @@
       "frameId": null,
       "roundness": null,
       "seed": 7007,
-      "version": 1,
-      "versionNonce": 7007,
+      "version": 2,
+      "versionNonce": 1508161927,
       "isDeleted": false,
       "boundElements": [],
-      "updated": 1700000000000,
+      "updated": 1782602803103,
       "link": null,
       "locked": false,
       "text": "⚙ generate txId UUID",
@@ -1061,15 +1253,16 @@
       "containerId": null,
       "originalText": "⚙ generate txId UUID",
       "lineHeight": 1.25,
-      "autoResize": true
+      "autoResize": true,
+      "index": "aV"
     },
     {
       "id": "msg5",
       "type": "arrow",
-      "x": 105,
+      "x": 495,
       "y": 378,
       "width": 390,
-      "height": 2,
+      "height": 0,
       "angle": 0,
       "strokeColor": "#1e1e1e",
       "backgroundColor": "transparent",
@@ -1080,21 +1273,33 @@
       "opacity": 100,
       "groupIds": [],
       "frameId": null,
-      "roundness": {"type": 2},
+      "roundness": {
+        "type": 2
+      },
       "seed": 7008,
-      "version": 1,
-      "versionNonce": 7008,
+      "version": 2,
+      "versionNonce": 788711017,
       "isDeleted": false,
       "boundElements": [],
-      "updated": 1700000000000,
+      "updated": 1782602803103,
       "link": null,
       "locked": false,
-      "points": [[390, 0], [0, 0]],
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          -390,
+          0
+        ]
+      ],
       "lastCommittedPoint": null,
       "startBinding": null,
       "endBinding": null,
       "startArrowhead": null,
-      "endArrowhead": "arrow"
+      "endArrowhead": "arrow",
+      "index": "aW"
     },
     {
       "id": "msg5-l",
@@ -1115,11 +1320,11 @@
       "frameId": null,
       "roundness": null,
       "seed": 7009,
-      "version": 1,
-      "versionNonce": 7009,
+      "version": 2,
+      "versionNonce": 1279389863,
       "isDeleted": false,
       "boundElements": [],
-      "updated": 1700000000000,
+      "updated": 1782602803103,
       "link": null,
       "locked": false,
       "text": "4. HTTP 202 Accepted  {transactionId}",
@@ -1131,7 +1336,8 @@
       "containerId": null,
       "originalText": "4. HTTP 202 Accepted  {transactionId}",
       "lineHeight": 1.25,
-      "autoResize": true
+      "autoResize": true,
+      "index": "aX"
     },
     {
       "id": "msg6",
@@ -1139,7 +1345,7 @@
       "x": 105,
       "y": 428,
       "width": 390,
-      "height": 2,
+      "height": 0,
       "angle": 0,
       "strokeColor": "#9673a6",
       "backgroundColor": "transparent",
@@ -1150,21 +1356,33 @@
       "opacity": 100,
       "groupIds": [],
       "frameId": null,
-      "roundness": {"type": 2},
+      "roundness": {
+        "type": 2
+      },
       "seed": 7010,
-      "version": 1,
-      "versionNonce": 7010,
+      "version": 2,
+      "versionNonce": 93327689,
       "isDeleted": false,
       "boundElements": [],
-      "updated": 1700000000000,
+      "updated": 1782602803103,
       "link": null,
       "locked": false,
-      "points": [[0, 0], [390, 0]],
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          390,
+          0
+        ]
+      ],
       "lastCommittedPoint": null,
       "startBinding": null,
       "endBinding": null,
       "startArrowhead": null,
-      "endArrowhead": "arrow"
+      "endArrowhead": "arrow",
+      "index": "aY"
     },
     {
       "id": "msg6-l",
@@ -1185,11 +1403,11 @@
       "frameId": null,
       "roundness": null,
       "seed": 7011,
-      "version": 1,
-      "versionNonce": 7011,
+      "version": 2,
+      "versionNonce": 1747665863,
       "isDeleted": false,
       "boundElements": [],
-      "updated": 1700000000000,
+      "updated": 1782602803104,
       "link": null,
       "locked": false,
       "text": "5. GET /api/v1/payments/stream/{txId}  (SSE subscribe)",
@@ -1201,7 +1419,8 @@
       "containerId": null,
       "originalText": "5. GET /api/v1/payments/stream/{txId}  (SSE subscribe)",
       "lineHeight": 1.25,
-      "autoResize": true
+      "autoResize": true,
+      "index": "aZ"
     },
     {
       "id": "msg7",
@@ -1209,7 +1428,7 @@
       "x": 495,
       "y": 490,
       "width": 210,
-      "height": 2,
+      "height": 0,
       "angle": 0,
       "strokeColor": "#82b366",
       "backgroundColor": "transparent",
@@ -1220,21 +1439,33 @@
       "opacity": 100,
       "groupIds": [],
       "frameId": null,
-      "roundness": {"type": 2},
+      "roundness": {
+        "type": 2
+      },
       "seed": 7012,
-      "version": 1,
-      "versionNonce": 7012,
+      "version": 2,
+      "versionNonce": 1978728489,
       "isDeleted": false,
       "boundElements": [],
-      "updated": 1700000000000,
+      "updated": 1782602803104,
       "link": null,
       "locked": false,
-      "points": [[0, 0], [210, 0]],
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          210,
+          0
+        ]
+      ],
       "lastCommittedPoint": null,
       "startBinding": null,
       "endBinding": null,
       "startArrowhead": null,
-      "endArrowhead": "arrow"
+      "endArrowhead": "arrow",
+      "index": "aa"
     },
     {
       "id": "msg7-l",
@@ -1255,11 +1486,11 @@
       "frameId": null,
       "roundness": null,
       "seed": 7013,
-      "version": 1,
-      "versionNonce": 7013,
+      "version": 2,
+      "versionNonce": 1572680423,
       "isDeleted": false,
       "boundElements": [],
-      "updated": 1700000000000,
+      "updated": 1782602803104,
       "link": null,
       "locked": false,
       "text": "6. gRPC VerifyAccount(txId...)",
@@ -1271,15 +1502,16 @@
       "containerId": null,
       "originalText": "6. gRPC VerifyAccount(txId...)",
       "lineHeight": 1.25,
-      "autoResize": true
+      "autoResize": true,
+      "index": "ab"
     },
     {
       "id": "msg8-note",
       "type": "text",
       "x": 710,
       "y": 516,
-      "width": 240,
-      "height": 16,
+      "width": 294.50079345703125,
+      "height": 27.5,
       "angle": 0,
       "strokeColor": "#666666",
       "backgroundColor": "#ffffee",
@@ -1292,31 +1524,32 @@
       "frameId": null,
       "roundness": null,
       "seed": 7014,
-      "version": 1,
-      "versionNonce": 7014,
+      "version": 3,
+      "versionNonce": 1215555785,
       "isDeleted": false,
       "boundElements": [],
-      "updated": 1700000000000,
+      "updated": 1782602867397,
       "link": null,
       "locked": false,
-      "text": "⚙ check balance + HOLD in accounts_db",
+      "text": "⚙ check balance + HOLD + INSERT outbox_messages\n   (same DB transaction, balance >= 0 enforced)",
       "fontSize": 11,
       "fontFamily": 1,
       "textAlign": "left",
       "verticalAlign": "top",
       "baseline": 14,
       "containerId": null,
-      "originalText": "⚙ check balance + HOLD in accounts_db",
+      "originalText": "⚙ check balance + HOLD + INSERT outbox_messages\n   (same DB transaction, balance >= 0 enforced)",
       "lineHeight": 1.25,
-      "autoResize": true
+      "autoResize": true,
+      "index": "ac"
     },
     {
       "id": "msg9",
       "type": "arrow",
-      "x": 705,
-      "y": 560,
+      "x": 708.18359375,
+      "y": 587.75390625,
       "width": 210,
-      "height": 2,
+      "height": 0,
       "angle": 0,
       "strokeColor": "#b85450",
       "backgroundColor": "transparent",
@@ -1327,29 +1560,41 @@
       "opacity": 100,
       "groupIds": [],
       "frameId": null,
-      "roundness": {"type": 2},
+      "roundness": {
+        "type": 2
+      },
       "seed": 7015,
-      "version": 1,
-      "versionNonce": 7015,
+      "version": 69,
+      "versionNonce": 814488231,
       "isDeleted": false,
       "boundElements": [],
-      "updated": 1700000000000,
+      "updated": 1782602858072,
       "link": null,
       "locked": false,
-      "points": [[0, 0], [210, 0]],
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          210,
+          0
+        ]
+      ],
       "lastCommittedPoint": null,
       "startBinding": null,
       "endBinding": null,
       "startArrowhead": null,
-      "endArrowhead": "arrow"
+      "endArrowhead": "arrow",
+      "index": "ad"
     },
     {
       "id": "msg9-l",
       "type": "text",
-      "x": 708,
-      "y": 542,
-      "width": 250,
-      "height": 16,
+      "x": 716.556640625,
+      "y": 551.69140625,
+      "width": 226.0975799560547,
+      "height": 26.452636718749996,
       "angle": 0,
       "strokeColor": "#b85450",
       "backgroundColor": "transparent",
@@ -1362,31 +1607,32 @@
       "frameId": null,
       "roundness": null,
       "seed": 7016,
-      "version": 1,
-      "versionNonce": 7016,
+      "version": 137,
+      "versionNonce": 1344815047,
       "isDeleted": false,
       "boundElements": [],
-      "updated": 1700000000000,
+      "updated": 1782602865075,
       "link": null,
       "locked": false,
-      "text": "7. produce payment-approved [traceparent]",
-      "fontSize": 11,
+      "text": "7. produce payment-approved [traceparent]\n   (async: OutboxPoller polls DB every 2s)",
+      "fontSize": 10.581054687499998,
       "fontFamily": 1,
       "textAlign": "left",
       "verticalAlign": "top",
       "baseline": 14,
       "containerId": null,
-      "originalText": "7. produce payment-approved [traceparent]",
+      "originalText": "7. produce payment-approved [traceparent]\n   (async: OutboxPoller polls DB every 2s)",
       "lineHeight": 1.25,
-      "autoResize": true
+      "autoResize": true,
+      "index": "ae"
     },
     {
       "id": "msg10",
       "type": "arrow",
-      "x": 495,
+      "x": 705,
       "y": 610,
       "width": 210,
-      "height": 2,
+      "height": 0,
       "angle": 0,
       "strokeColor": "#82b366",
       "backgroundColor": "transparent",
@@ -1397,21 +1643,33 @@
       "opacity": 100,
       "groupIds": [],
       "frameId": null,
-      "roundness": {"type": 2},
+      "roundness": {
+        "type": 2
+      },
       "seed": 7017,
-      "version": 1,
-      "versionNonce": 7017,
+      "version": 2,
+      "versionNonce": 1920787751,
       "isDeleted": false,
       "boundElements": [],
-      "updated": 1700000000000,
+      "updated": 1782602803104,
       "link": null,
       "locked": false,
-      "points": [[210, 0], [0, 0]],
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          -210,
+          0
+        ]
+      ],
       "lastCommittedPoint": null,
       "startBinding": null,
       "endBinding": null,
       "startArrowhead": null,
-      "endArrowhead": "arrow"
+      "endArrowhead": "arrow",
+      "index": "af"
     },
     {
       "id": "msg10-l",
@@ -1432,11 +1690,11 @@
       "frameId": null,
       "roundness": null,
       "seed": 7018,
-      "version": 1,
-      "versionNonce": 7018,
+      "version": 2,
+      "versionNonce": 739026121,
       "isDeleted": false,
       "boundElements": [],
-      "updated": 1700000000000,
+      "updated": 1782602803104,
       "link": null,
       "locked": false,
       "text": "8. gRPC response: approved=true",
@@ -1448,7 +1706,8 @@
       "containerId": null,
       "originalText": "8. gRPC response: approved=true",
       "lineHeight": 1.25,
-      "autoResize": true
+      "autoResize": true,
+      "index": "ag"
     },
     {
       "id": "msg11",
@@ -1456,7 +1715,7 @@
       "x": 915,
       "y": 666,
       "width": 210,
-      "height": 2,
+      "height": 0,
       "angle": 0,
       "strokeColor": "#6c8ebf",
       "backgroundColor": "transparent",
@@ -1467,21 +1726,33 @@
       "opacity": 100,
       "groupIds": [],
       "frameId": null,
-      "roundness": {"type": 2},
+      "roundness": {
+        "type": 2
+      },
       "seed": 7019,
-      "version": 1,
-      "versionNonce": 7019,
+      "version": 2,
+      "versionNonce": 1679009863,
       "isDeleted": false,
       "boundElements": [],
-      "updated": 1700000000000,
+      "updated": 1782602803104,
       "link": null,
       "locked": false,
-      "points": [[0, 0], [210, 0]],
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          210,
+          0
+        ]
+      ],
       "lastCommittedPoint": null,
       "startBinding": null,
       "endBinding": null,
       "startArrowhead": null,
-      "endArrowhead": "arrow"
+      "endArrowhead": "arrow",
+      "index": "ah"
     },
     {
       "id": "msg11-l",
@@ -1502,11 +1773,11 @@
       "frameId": null,
       "roundness": null,
       "seed": 7020,
-      "version": 1,
-      "versionNonce": 7020,
+      "version": 2,
+      "versionNonce": 1452221353,
       "isDeleted": false,
       "boundElements": [],
-      "updated": 1700000000000,
+      "updated": 1782602803104,
       "link": null,
       "locked": false,
       "text": "9. consume payment-approved",
@@ -1518,7 +1789,8 @@
       "containerId": null,
       "originalText": "9. consume payment-approved",
       "lineHeight": 1.25,
-      "autoResize": true
+      "autoResize": true,
+      "index": "ai"
     },
     {
       "id": "msg12-note",
@@ -1539,11 +1811,11 @@
       "frameId": null,
       "roundness": null,
       "seed": 7021,
-      "version": 1,
-      "versionNonce": 7021,
+      "version": 2,
+      "versionNonce": 2015692647,
       "isDeleted": false,
       "boundElements": [],
-      "updated": 1700000000000,
+      "updated": 1782602803104,
       "link": null,
       "locked": false,
       "text": "⚙ INSERT ledger record to ledger_db",
@@ -1555,15 +1827,16 @@
       "containerId": null,
       "originalText": "⚙ INSERT ledger record to ledger_db",
       "lineHeight": 1.25,
-      "autoResize": true
+      "autoResize": true,
+      "index": "aj"
     },
     {
       "id": "msg13",
       "type": "arrow",
-      "x": 1125,
-      "y": 742,
+      "x": 1130.66796875,
+      "y": 766.91015625,
       "width": 200,
-      "height": 2,
+      "height": 0,
       "angle": 0,
       "strokeColor": "#b85450",
       "backgroundColor": "transparent",
@@ -1574,29 +1847,41 @@
       "opacity": 100,
       "groupIds": [],
       "frameId": null,
-      "roundness": {"type": 2},
+      "roundness": {
+        "type": 2
+      },
       "seed": 7022,
-      "version": 1,
-      "versionNonce": 7022,
+      "version": 29,
+      "versionNonce": 355590185,
       "isDeleted": false,
       "boundElements": [],
-      "updated": 1700000000000,
+      "updated": 1782602897123,
       "link": null,
       "locked": false,
-      "points": [[0, 0], [200, 0]],
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          200,
+          0
+        ]
+      ],
       "lastCommittedPoint": null,
       "startBinding": null,
       "endBinding": null,
       "startArrowhead": null,
-      "endArrowhead": "arrow"
+      "endArrowhead": "arrow",
+      "index": "ak"
     },
     {
       "id": "msg13-l",
       "type": "text",
       "x": 1128,
       "y": 724,
-      "width": 250,
-      "height": 16,
+      "width": 274.6348876953125,
+      "height": 27.5,
       "angle": 0,
       "strokeColor": "#b85450",
       "backgroundColor": "transparent",
@@ -1609,23 +1894,24 @@
       "frameId": null,
       "roundness": null,
       "seed": 7023,
-      "version": 1,
-      "versionNonce": 7023,
+      "version": 3,
+      "versionNonce": 343508169,
       "isDeleted": false,
       "boundElements": [],
-      "updated": 1700000000000,
+      "updated": 1782602898510,
       "link": null,
       "locked": false,
-      "text": "10. JMS put DEV.QUEUE.CLEARING [traceparent]",
+      "text": "10. JMS put DEV.QUEUE.CLEARING [traceparent]\n    (@Retryable ×5, exponential backoff)",
       "fontSize": 11,
       "fontFamily": 1,
       "textAlign": "left",
       "verticalAlign": "top",
       "baseline": 14,
       "containerId": null,
-      "originalText": "10. JMS put DEV.QUEUE.CLEARING [traceparent]",
+      "originalText": "10. JMS put DEV.QUEUE.CLEARING [traceparent]\n    (@Retryable ×5, exponential backoff)",
       "lineHeight": 1.25,
-      "autoResize": true
+      "autoResize": true,
+      "index": "al"
     },
     {
       "id": "msg14",
@@ -1633,7 +1919,7 @@
       "x": 1325,
       "y": 800,
       "width": 195,
-      "height": 2,
+      "height": 0,
       "angle": 0,
       "strokeColor": "#82b366",
       "backgroundColor": "transparent",
@@ -1644,21 +1930,33 @@
       "opacity": 100,
       "groupIds": [],
       "frameId": null,
-      "roundness": {"type": 2},
+      "roundness": {
+        "type": 2
+      },
       "seed": 7024,
-      "version": 1,
-      "versionNonce": 7024,
+      "version": 2,
+      "versionNonce": 1031212393,
       "isDeleted": false,
       "boundElements": [],
-      "updated": 1700000000000,
+      "updated": 1782602803104,
       "link": null,
       "locked": false,
-      "points": [[0, 0], [195, 0]],
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          195,
+          0
+        ]
+      ],
       "lastCommittedPoint": null,
       "startBinding": null,
       "endBinding": null,
       "startArrowhead": null,
-      "endArrowhead": "arrow"
+      "endArrowhead": "arrow",
+      "index": "am"
     },
     {
       "id": "msg14-l",
@@ -1679,31 +1977,32 @@
       "frameId": null,
       "roundness": null,
       "seed": 7025,
-      "version": 1,
-      "versionNonce": 7025,
+      "version": 2,
+      "versionNonce": 1129945511,
       "isDeleted": false,
       "boundElements": [],
-      "updated": 1700000000000,
+      "updated": 1782602803104,
       "link": null,
       "locked": false,
-      "text": "11. JMS consume message",
+      "text": "11. JMS consume message (CLIENT_ACKNOWLEDGE)",
       "fontSize": 11,
       "fontFamily": 1,
       "textAlign": "left",
       "verticalAlign": "top",
       "baseline": 14,
       "containerId": null,
-      "originalText": "11. JMS consume message",
+      "originalText": "11. JMS consume message (CLIENT_ACKNOWLEDGE)",
       "lineHeight": 1.25,
-      "autoResize": true
+      "autoResize": true,
+      "index": "an"
     },
     {
       "id": "msg15-note",
       "type": "text",
       "x": 1523,
       "y": 826,
-      "width": 230,
-      "height": 16,
+      "width": 264.2509765625,
+      "height": 27.5,
       "angle": 0,
       "strokeColor": "#666666",
       "backgroundColor": "#ffffee",
@@ -1716,31 +2015,32 @@
       "frameId": null,
       "roundness": null,
       "seed": 7026,
-      "version": 1,
-      "versionNonce": 7026,
+      "version": 3,
+      "versionNonce": 1692596583,
       "isDeleted": false,
       "boundElements": [],
-      "updated": 1700000000000,
+      "updated": 1782602921377,
       "link": null,
       "locked": false,
-      "text": "⚙ simulate clearing delay (100-500ms)",
+      "text": "⚙ simulate clearing delay (100-500ms)\n   ack to MQ only after Kafka publish succeeds",
       "fontSize": 11,
       "fontFamily": 1,
       "textAlign": "left",
       "verticalAlign": "top",
       "baseline": 14,
       "containerId": null,
-      "originalText": "⚙ simulate clearing delay (100-500ms)",
+      "originalText": "⚙ simulate clearing delay (100-500ms)\n   ack to MQ only after Kafka publish succeeds",
       "lineHeight": 1.25,
-      "autoResize": true
+      "autoResize": true,
+      "index": "ao"
     },
     {
       "id": "msg16",
       "type": "arrow",
-      "x": 915,
+      "x": 1520,
       "y": 876,
       "width": 605,
-      "height": 2,
+      "height": 0,
       "angle": 0,
       "strokeColor": "#b85450",
       "backgroundColor": "transparent",
@@ -1751,21 +2051,33 @@
       "opacity": 100,
       "groupIds": [],
       "frameId": null,
-      "roundness": {"type": 2},
+      "roundness": {
+        "type": 2
+      },
       "seed": 7027,
-      "version": 1,
-      "versionNonce": 7027,
+      "version": 2,
+      "versionNonce": 1348848839,
       "isDeleted": false,
       "boundElements": [],
-      "updated": 1700000000000,
+      "updated": 1782602803104,
       "link": null,
       "locked": false,
-      "points": [[605, 0], [0, 0]],
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          -605,
+          0
+        ]
+      ],
       "lastCommittedPoint": null,
       "startBinding": null,
       "endBinding": null,
       "startArrowhead": null,
-      "endArrowhead": "arrow"
+      "endArrowhead": "arrow",
+      "index": "ap"
     },
     {
       "id": "msg16-l",
@@ -1786,11 +2098,11 @@
       "frameId": null,
       "roundness": null,
       "seed": 7028,
-      "version": 1,
-      "versionNonce": 7028,
+      "version": 2,
+      "versionNonce": 725583657,
       "isDeleted": false,
       "boundElements": [],
-      "updated": 1700000000000,
+      "updated": 1782602803104,
       "link": null,
       "locked": false,
       "text": "12. produce payment-completed [traceparent]",
@@ -1802,15 +2114,16 @@
       "containerId": null,
       "originalText": "12. produce payment-completed [traceparent]",
       "lineHeight": 1.25,
-      "autoResize": true
+      "autoResize": true,
+      "index": "aq"
     },
     {
       "id": "msg17",
       "type": "arrow",
-      "x": 495,
+      "x": 915,
       "y": 940,
       "width": 420,
-      "height": 2,
+      "height": 0,
       "angle": 0,
       "strokeColor": "#9673a6",
       "backgroundColor": "transparent",
@@ -1821,21 +2134,33 @@
       "opacity": 100,
       "groupIds": [],
       "frameId": null,
-      "roundness": {"type": 2},
+      "roundness": {
+        "type": 2
+      },
       "seed": 7029,
-      "version": 1,
-      "versionNonce": 7029,
+      "version": 2,
+      "versionNonce": 1337891815,
       "isDeleted": false,
       "boundElements": [],
-      "updated": 1700000000000,
+      "updated": 1782602803104,
       "link": null,
       "locked": false,
-      "points": [[420, 0], [0, 0]],
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          -420,
+          0
+        ]
+      ],
       "lastCommittedPoint": null,
       "startBinding": null,
       "endBinding": null,
       "startArrowhead": null,
-      "endArrowhead": "arrow"
+      "endArrowhead": "arrow",
+      "index": "ar"
     },
     {
       "id": "msg17-l",
@@ -1856,11 +2181,11 @@
       "frameId": null,
       "roundness": null,
       "seed": 7030,
-      "version": 1,
-      "versionNonce": 7030,
+      "version": 2,
+      "versionNonce": 100055561,
       "isDeleted": false,
       "boundElements": [],
-      "updated": 1700000000000,
+      "updated": 1782602803104,
       "link": null,
       "locked": false,
       "text": "13. consume payment-completed",
@@ -1872,15 +2197,16 @@
       "containerId": null,
       "originalText": "13. consume payment-completed",
       "lineHeight": 1.25,
-      "autoResize": true
+      "autoResize": true,
+      "index": "as"
     },
     {
       "id": "msg18",
       "type": "arrow",
-      "x": 105,
+      "x": 495,
       "y": 1004,
       "width": 390,
-      "height": 2,
+      "height": 0,
       "angle": 0,
       "strokeColor": "#9673a6",
       "backgroundColor": "transparent",
@@ -1891,21 +2217,33 @@
       "opacity": 100,
       "groupIds": [],
       "frameId": null,
-      "roundness": {"type": 2},
+      "roundness": {
+        "type": 2
+      },
       "seed": 7031,
-      "version": 1,
-      "versionNonce": 7031,
+      "version": 2,
+      "versionNonce": 91260679,
       "isDeleted": false,
       "boundElements": [],
-      "updated": 1700000000000,
+      "updated": 1782602803104,
       "link": null,
       "locked": false,
-      "points": [[390, 0], [0, 0]],
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          -390,
+          0
+        ]
+      ],
       "lastCommittedPoint": null,
       "startBinding": null,
       "endBinding": null,
       "startArrowhead": null,
-      "endArrowhead": "arrow"
+      "endArrowhead": "arrow",
+      "index": "at"
     },
     {
       "id": "msg18-l",
@@ -1926,11 +2264,11 @@
       "frameId": null,
       "roundness": null,
       "seed": 7032,
-      "version": 1,
-      "versionNonce": 7032,
+      "version": 2,
+      "versionNonce": 755273961,
       "isDeleted": false,
       "boundElements": [],
-      "updated": 1700000000000,
+      "updated": 1782602803104,
       "link": null,
       "locked": false,
       "text": "14. SSE event  {status: \"COMPLETED\", detail: \"Clearing successful\"}",
@@ -1942,15 +2280,16 @@
       "containerId": null,
       "originalText": "14. SSE event  {status: \"COMPLETED\", detail: \"Clearing successful\"}",
       "lineHeight": 1.25,
-      "autoResize": true
+      "autoResize": true,
+      "index": "au"
     },
     {
       "id": "otel-seq-note",
       "type": "text",
       "x": 40,
       "y": 1064,
-      "width": 700,
-      "height": 18,
+      "width": 910.3619995117188,
+      "height": 75,
       "angle": 0,
       "strokeColor": "#666666",
       "backgroundColor": "transparent",
@@ -1963,27 +2302,30 @@
       "frameId": null,
       "roundness": null,
       "seed": 8001,
-      "version": 1,
-      "versionNonce": 8001,
+      "version": 3,
+      "versionNonce": 853046569,
       "isDeleted": false,
       "boundElements": [],
-      "updated": 1700000000000,
+      "updated": 1782602942669,
       "link": null,
       "locked": false,
-      "text": "★  [traceparent] = W3C Trace Context header propagated via OTel Java Agent across all protocol boundaries",
+      "text": "★  [traceparent] = W3C Trace Context header propagated via OTel Java Agent across all protocol boundaries\n◆  Step 7 is decoupled: account-verifier writes to outbox_messages in the same DB tx as the balance hold; OutboxPoller publishes to Kafka every 2 s\n◆  Step 10: MQ publish is @Retryable (up to 5 attempts, exponential backoff, max 30 s)\n◆  Step 11: clearing-house uses CLIENT_ACKNOWLEDGE — MQ message stays on queue until Kafka publish succeeds (at-least-once)\n◆  SSE (step 14): CompletableFuture bridge in payment-gateway resolves race where pipeline finishes before browser subscribes",
       "fontSize": 12,
       "fontFamily": 1,
       "textAlign": "left",
       "verticalAlign": "top",
       "baseline": 16,
       "containerId": null,
-      "originalText": "★  [traceparent] = W3C Trace Context header propagated via OTel Java Agent across all protocol boundaries",
+      "originalText": "★  [traceparent] = W3C Trace Context header propagated via OTel Java Agent across all protocol boundaries\n◆  Step 7 is decoupled: account-verifier writes to outbox_messages in the same DB tx as the balance hold; OutboxPoller publishes to Kafka every 2 s\n◆  Step 10: MQ publish is @Retryable (up to 5 attempts, exponential backoff, max 30 s)\n◆  Step 11: clearing-house uses CLIENT_ACKNOWLEDGE — MQ message stays on queue until Kafka publish succeeds (at-least-once)\n◆  SSE (step 14): CompletableFuture bridge in payment-gateway resolves race where pipeline finishes before browser subscribes",
       "lineHeight": 1.25,
-      "autoResize": true
+      "autoResize": true,
+      "index": "av"
     }
   ],
   "appState": {
-    "gridSize": null,
+    "gridSize": 20,
+    "gridStep": 5,
+    "gridModeEnabled": false,
     "viewBackgroundColor": "#ffffff"
   },
   "files": {}

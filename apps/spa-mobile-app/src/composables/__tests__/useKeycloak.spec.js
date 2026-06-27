@@ -70,4 +70,25 @@ describe('useKeycloak', () => {
     await init()
     expect(username.value).toBe('testuser')
   })
+
+  it('refreshToken resolves without calling login when updateToken succeeds', async () => {
+    const { default: Keycloak } = await import('keycloak-js')
+    const { useKeycloak } = await import('../useKeycloak.js')
+    const { refreshToken } = useKeycloak()
+    const instance = Keycloak.mock.results[0]?.value
+    instance.updateToken.mockResolvedValue(true)
+    await refreshToken(30)
+    expect(instance.updateToken).toHaveBeenCalledWith(30)
+    expect(instance.login).not.toHaveBeenCalled()
+  })
+
+  it('refreshToken calls login when updateToken rejects', async () => {
+    const { default: Keycloak } = await import('keycloak-js')
+    const { useKeycloak } = await import('../useKeycloak.js')
+    const { refreshToken } = useKeycloak()
+    const instance = Keycloak.mock.results[0]?.value
+    instance.updateToken.mockRejectedValue(new Error('Session expired'))
+    await refreshToken(30)
+    expect(instance.login).toHaveBeenCalled()
+  })
 })

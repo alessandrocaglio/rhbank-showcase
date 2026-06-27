@@ -9,11 +9,14 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import org.slf4j.MDC;
+
 import java.math.BigDecimal;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
@@ -90,5 +93,22 @@ class LedgerServiceTest {
 
         assertThat(result).isSameAs(existingLedger);
         verify(repository, never()).save(any());
+    }
+
+    @Test
+    void persistLedgerRecord_clearsMdcAfterReturn() {
+        when(repository.findByTransactionId("TXN-MDC")).thenReturn(Optional.empty());
+        when(repository.save(any())).thenAnswer(i -> i.getArgument(0));
+
+        // put a value in MDC before the call to simulate a prior message
+        MDC.put("transactionId", "OLD-TXN");
+
+        PaymentApprovedEvent event = new PaymentApprovedEvent(
+                "TXN-MDC", "ACC-001", "ACC-002",
+                new BigDecimal("50.00"), "USD", "2024-01-15T10:30:00Z");
+        ledgerService.persistLedgerRecord(event);
+
+        // MDC must be cleared after the call — not carry the new transactionId either
+        assertNull(MDC.get("transactionId"));
     }
 }

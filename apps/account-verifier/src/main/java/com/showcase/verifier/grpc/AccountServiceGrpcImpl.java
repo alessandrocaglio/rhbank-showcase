@@ -40,7 +40,7 @@ public class AccountServiceGrpcImpl extends AccountServiceGrpc.AccountServiceImp
                         request.getTransactionId(),
                         request.getSourceAccount(),
                         request.getDestinationAccount(),
-                        new BigDecimal(String.valueOf(request.getAmount())),
+                        new BigDecimal(request.getAmount()),
                         request.getCurrency()))
                 .onComplete(ar -> {
                     if (ar.succeeded()) {
