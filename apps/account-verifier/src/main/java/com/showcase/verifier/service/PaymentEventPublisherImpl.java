@@ -4,21 +4,21 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.showcase.verifier.dto.PaymentApprovedEvent;
 import io.opentelemetry.api.trace.Span;
 import io.opentelemetry.api.trace.StatusCode;
+import io.smallrye.reactive.messaging.MutinyEmitter;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
 import org.eclipse.microprofile.reactive.messaging.Channel;
-import org.eclipse.microprofile.reactive.messaging.Emitter;
 
 @ApplicationScoped
 public class PaymentEventPublisherImpl implements PaymentEventPublisher {
 
-    private final Emitter<String> emitter;
+    private final MutinyEmitter<String> emitter;
     private final ObjectMapper objectMapper;
 
     @Inject
     public PaymentEventPublisherImpl(
-            @Channel("payment-approved") Emitter<String> emitter,
+            @Channel("payment-approved") MutinyEmitter<String> emitter,
             ObjectMapper objectMapper) {
         this.emitter = emitter;
         this.objectMapper = objectMapper;
@@ -29,7 +29,7 @@ public class PaymentEventPublisherImpl implements PaymentEventPublisher {
     public void publishApproved(PaymentApprovedEvent event) {
         try {
             String json = objectMapper.writeValueAsString(event);
-            emitter.send(json);
+            emitter.sendAndAwait(json);
         } catch (Exception ex) {
             Span.current().setStatus(StatusCode.ERROR, ex.getMessage());
             Span.current().recordException(ex);

@@ -10,6 +10,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.math.BigDecimal;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -35,6 +36,7 @@ class LedgerServiceTest {
                 "USD",
                 "2024-01-15T10:30:00Z");
 
+        when(repository.findByTransactionId("txn-100")).thenReturn(Optional.empty());
         when(repository.save(any(TransactionLedger.class)))
                 .thenAnswer(invocation -> invocation.getArgument(0));
 
@@ -59,11 +61,34 @@ class LedgerServiceTest {
                 "USD",
                 "2024-01-15T10:30:00Z");
 
+        when(repository.findByTransactionId("txn-fail")).thenReturn(Optional.empty());
         when(repository.save(any(TransactionLedger.class)))
                 .thenThrow(new RuntimeException("DB connection lost"));
 
         assertThatThrownBy(() -> ledgerService.persistLedgerRecord(event))
                 .isInstanceOf(RuntimeException.class)
                 .hasMessage("DB connection lost");
+    }
+
+    @Test
+    void persistLedgerRecord_whenTransactionAlreadyExists_returnsExistingRecord() {
+        PaymentApprovedEvent event = new PaymentApprovedEvent(
+                "TXN-001",
+                "ACC-001",
+                "ACC-002",
+                new BigDecimal("250.00"),
+                "USD",
+                "2024-01-15T10:30:00Z");
+
+        TransactionLedger existingLedger = TransactionLedger.create(
+                "TXN-001", "ACC-001", "ACC-002",
+                new BigDecimal("250.00"), "USD", "PENDING");
+
+        when(repository.findByTransactionId("TXN-001")).thenReturn(Optional.of(existingLedger));
+
+        TransactionLedger result = ledgerService.persistLedgerRecord(event);
+
+        assertThat(result).isSameAs(existingLedger);
+        verify(repository, never()).save(any());
     }
 }

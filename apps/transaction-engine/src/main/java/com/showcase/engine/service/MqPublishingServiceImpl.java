@@ -9,8 +9,12 @@ import io.opentelemetry.api.trace.Span;
 import io.opentelemetry.context.Context;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.jms.JmsException;
 import org.springframework.jms.core.JmsTemplate;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.retry.annotation.Backoff;
+import org.springframework.retry.annotation.Recover;
+import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
@@ -36,6 +40,11 @@ public class MqPublishingServiceImpl implements MqPublishingService {
     }
 
     @Override
+    @Retryable(
+        retryFor = { JmsException.class, RuntimeException.class },
+        maxAttempts = 5,
+        backoff = @Backoff(delay = 1000, multiplier = 2, maxDelay = 30_000)
+    )
     public void publishToClearingQueue(TransactionLedger ledger) {
         ClearingMessagePayload payload = new ClearingMessagePayload(
                 ledger.getTransactionId(),
@@ -64,6 +73,13 @@ public class MqPublishingServiceImpl implements MqPublishingService {
         });
 
         log.info("Published clearing message for transactionId={}", ledger.getTransactionId());
+    }
+
+    @Recover
+    public void recoverPublishToClearingQueue(Exception ex, TransactionLedger ledger) {
+        log.error("All MQ publish retries exhausted for transactionId={}. Payment is stuck in PENDING state. Manual intervention required.",
+                  ledger.getTransactionId(), ex);
+        // In production this would alert PagerDuty / write to a dead-letter store.
     }
 
     private String extractTraceparent() {

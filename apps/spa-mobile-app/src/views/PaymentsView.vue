@@ -6,8 +6,10 @@
       <div class="form-group">
         <label for="source-account">Source Account</label>
         <select id="source-account" v-model="form.sourceAccount" class="input-field">
-          <option value="ACC-001">ACC-001</option>
-          <option value="ACC-002">ACC-002</option>
+          <option value="ACC-001">ACC-001 — Alice Martin ($10,000) ✓ Active</option>
+          <option value="ACC-002">ACC-002 — Bob Johnson ($5,000) ✓ Active</option>
+          <option value="ACC-003">ACC-003 — Charlie Brown ($0) ✗ Insufficient funds</option>
+          <option value="ACC-004">ACC-004 — Diana Prince (Suspended) ✗ Rejected</option>
         </select>
         <span v-if="errors.sourceAccount" class="field-error">{{ errors.sourceAccount }}</span>
       </div>

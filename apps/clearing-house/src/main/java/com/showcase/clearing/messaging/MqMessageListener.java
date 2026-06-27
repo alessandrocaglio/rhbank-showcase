@@ -11,6 +11,7 @@ import io.opentelemetry.context.Scope;
 import io.opentelemetry.context.propagation.TextMapGetter;
 import io.quarkus.runtime.Startup;
 import jakarta.annotation.PostConstruct;
+import jakarta.annotation.PreDestroy;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import org.jboss.logging.Logger;
@@ -45,6 +46,9 @@ public class MqMessageListener {
         }
     };
 
+    private volatile boolean running = true;
+    private Thread listenerThread;
+
     private final MQConnectionFactory connectionFactory;
     private final ClearingService clearingService;
     private final PaymentCompletedPublisher publisher;
@@ -63,18 +67,26 @@ public class MqMessageListener {
 
     @PostConstruct
     public void startListening() {
-        Thread listenerThread = new Thread(this::listenLoop, "mq-listener");
+        listenerThread = new Thread(this::listenLoop, "mq-listener");
         listenerThread.setDaemon(true);
         listenerThread.start();
     }
 
+    @PreDestroy
+    public void stopListening() {
+        running = false;
+        if (listenerThread != null) {
+            listenerThread.interrupt();
+        }
+    }
+
     private void listenLoop() {
-        while (!Thread.currentThread().isInterrupted()) {
-            try (JMSContext context = connectionFactory.createContext()) {
+        while (running && !Thread.currentThread().isInterrupted()) {
+            try (JMSContext context = connectionFactory.createContext(JMSContext.CLIENT_ACKNOWLEDGE)) {
                 Queue queue = context.createQueue(queueName);
                 javax.jms.JMSConsumer consumer = context.createConsumer(queue);
                 LOG.info("MQ listener started, waiting for messages on queue");
-                while (!Thread.currentThread().isInterrupted()) {
+                while (running && !Thread.currentThread().isInterrupted()) {
                     javax.jms.Message message = consumer.receive();
                     if (message instanceof TextMessage textMessage) {
                         try {
@@ -87,12 +99,19 @@ public class MqMessageListener {
                 }
             } catch (JMSRuntimeException e) {
                 LOG.errorf(e, "JMS connection lost, retrying in 5 seconds");
-                try {
-                    Thread.sleep(5_000);
-                } catch (InterruptedException ie) {
-                    Thread.currentThread().interrupt();
-                }
+                sleepBeforeRetry();
+            } catch (Exception e) {
+                LOG.errorf(e, "Unexpected error in MQ listener loop, retrying in 5 seconds");
+                sleepBeforeRetry();
             }
+        }
+    }
+
+    private void sleepBeforeRetry() {
+        try {
+            Thread.sleep(5_000);
+        } catch (InterruptedException ie) {
+            Thread.currentThread().interrupt();
         }
     }
 
@@ -125,11 +144,17 @@ public class MqMessageListener {
 
                 publisher.publish(result);
 
+                // Only acknowledge AFTER successful Kafka publish.
+                // With CLIENT_ACKNOWLEDGE, IBM MQ will not consider the message consumed
+                // until this call completes. If an exception was thrown above, we skip
+                // acknowledgement so IBM MQ redelivers the message on the next connection.
+                message.acknowledge();
+
                 LOG.infof("Clearing completed for transactionId=%s status=%s", transactionId, result.status());
             } catch (Exception e) {
                 span.setStatus(io.opentelemetry.api.trace.StatusCode.ERROR, e.getMessage());
                 span.recordException(e);
-                throw e;
+                throw e;   // do NOT acknowledge — let the broker redeliver
             } finally {
                 span.end();
             }

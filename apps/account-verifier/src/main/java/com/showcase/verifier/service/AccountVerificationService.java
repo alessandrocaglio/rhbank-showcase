@@ -1,7 +1,10 @@
 package com.showcase.verifier.service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.showcase.verifier.dto.PaymentApprovedEvent;
 import com.showcase.verifier.dto.VerificationResult;
+import com.showcase.verifier.outbox.OutboxMessage;
+import com.showcase.verifier.outbox.OutboxRepository;
 import com.showcase.verifier.repository.AccountRepository;
 import io.opentelemetry.api.trace.Span;
 import io.opentelemetry.api.trace.StatusCode;
@@ -15,13 +18,16 @@ import java.math.BigDecimal;
 public class AccountVerificationService {
 
     private final AccountRepository accountRepository;
-    private final PaymentEventPublisher paymentEventPublisher;
+    private final OutboxRepository outboxRepository;
+    private final ObjectMapper objectMapper;
 
     @Inject
     public AccountVerificationService(AccountRepository accountRepository,
-                                      PaymentEventPublisher paymentEventPublisher) {
+                                      OutboxRepository outboxRepository,
+                                      ObjectMapper objectMapper) {
         this.accountRepository = accountRepository;
-        this.paymentEventPublisher = paymentEventPublisher;
+        this.outboxRepository = outboxRepository;
+        this.objectMapper = objectMapper;
     }
 
     @Transactional
@@ -31,11 +37,30 @@ public class AccountVerificationService {
                                      BigDecimal amount,
                                      String currency) {
         Span span = Span.current();
+
+        // Input validation — reject before any DB access
+        if (amount == null || amount.compareTo(BigDecimal.ZERO) <= 0) {
+            span.setAttribute("bank.account.approved", false);
+            return VerificationResult.ofRejected("Amount must be positive");
+        }
+        if (sourceAccount == null || sourceAccount.isBlank()) {
+            span.setAttribute("bank.account.approved", false);
+            return VerificationResult.ofRejected("Source account is required");
+        }
+        if (destinationAccount == null || destinationAccount.isBlank()) {
+            span.setAttribute("bank.account.approved", false);
+            return VerificationResult.ofRejected("Destination account is required");
+        }
+        if (sourceAccount.equals(destinationAccount)) {
+            span.setAttribute("bank.account.approved", false);
+            return VerificationResult.ofRejected("Source and destination accounts must differ");
+        }
+
         span.setAttribute("bank.payment.transaction_id", transactionId);
         span.setAttribute("bank.account.source", sourceAccount);
 
         try {
-            var accountOpt = accountRepository.findByIdOptional(sourceAccount);
+            var accountOpt = accountRepository.findByAccountIdForUpdate(sourceAccount);
             if (accountOpt.isEmpty()) {
                 VerificationResult result = VerificationResult.ofRejected("Account not found: " + sourceAccount);
                 span.setAttribute("bank.account.approved", result.approved());
@@ -67,7 +92,15 @@ public class AccountVerificationService {
                     currency,
                     java.time.Instant.now().toString()
             );
-            paymentEventPublisher.publishApproved(event);
+
+            // Write outbox entry atomically with the balance deduction — no Kafka call here.
+            // The OutboxPoller will read this row and publish to Kafka asynchronously.
+            try {
+                String payload = objectMapper.writeValueAsString(event);
+                outboxRepository.persist(OutboxMessage.of("payment-approved", payload));
+            } catch (Exception ex) {
+                throw new RuntimeException("Failed to serialize payment event to outbox", ex);
+            }
 
             VerificationResult result = VerificationResult.ofApproved();
             span.setAttribute("bank.account.approved", result.approved());

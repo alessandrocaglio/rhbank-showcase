@@ -9,6 +9,8 @@ import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
+
 @Service
 public class LedgerService {
 
@@ -22,6 +24,13 @@ public class LedgerService {
 
     public TransactionLedger persistLedgerRecord(PaymentApprovedEvent event) {
         MDC.put("transactionId", event.transactionId());
+
+        Optional<TransactionLedger> existing = repository.findByTransactionId(event.transactionId());
+        if (existing.isPresent()) {
+            log.warn("Duplicate payment-approved for txId={}, reusing existing ledger record", event.transactionId());
+            return existing.get();
+        }
+
         log.info("Persisting ledger record for transaction {}", event.transactionId());
 
         TransactionLedger ledger = TransactionLedger.create(

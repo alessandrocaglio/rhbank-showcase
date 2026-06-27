@@ -83,4 +83,33 @@ class PaymentApprovedListenerTest {
                         verify(ledgerService).persistLedgerRecord(
                                 argThat(e -> "txn-listener-001".equals(e.transactionId()))));
     }
+
+    @Test
+    void onPaymentApproved_whenDuplicate_stillSendsMqMessage() throws Exception {
+        PaymentApprovedEvent event = new PaymentApprovedEvent(
+                "txn-listener-dup-001",
+                "ACC-001",
+                "ACC-002",
+                new BigDecimal("300.00"),
+                "USD",
+                "2024-01-15T10:30:00Z");
+
+        // ledgerService returns an existing ledger (simulates prior successful DB write)
+        TransactionLedger existingLedger = TransactionLedger.create(
+                "txn-listener-dup-001", "ACC-001", "ACC-002",
+                new BigDecimal("300.00"), "USD", "PENDING");
+
+        when(ledgerService.persistLedgerRecord(argThat(e ->
+                "txn-listener-dup-001".equals(e.transactionId()))))
+                .thenReturn(existingLedger);
+
+        String payload = objectMapper.writeValueAsString(event);
+        kafkaTemplate.send("payment-approved", payload);
+
+        // even when ledgerService returns an existing (duplicate) record,
+        // the MQ send must still be attempted
+        await().atMost(5, TimeUnit.SECONDS)
+                .untilAsserted(() ->
+                        verify(mqPublishingService).publishToClearingQueue(existingLedger));
+    }
 }

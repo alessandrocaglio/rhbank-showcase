@@ -55,6 +55,7 @@ class MqMessageListenerTest {
 
         verify(clearingService).process("txn-001");
         verify(publisher).publish(any(ClearingResult.class));
+        verify(message).acknowledge();
     }
 
     @Test
@@ -69,6 +70,7 @@ class MqMessageListenerTest {
 
         verify(clearingService).process("txn-002");
         verify(publisher).publish(any(ClearingResult.class));
+        verify(message).acknowledge();
     }
 
     @Test
@@ -82,6 +84,7 @@ class MqMessageListenerTest {
         listener.processMessage(message);
 
         verify(publisher).publish(expected);
+        verify(message).acknowledge();
     }
 
     @Test
@@ -95,6 +98,36 @@ class MqMessageListenerTest {
 
         verify(clearingService).process("txn-004");
         verifyNoInteractions(publisher);
+        verify(message, never()).acknowledge();
+    }
+
+    /**
+     * Verifies that a RuntimeException thrown by publisher.publish() (e.g. Kafka back-pressure,
+     * broker timeout) propagates out of processMessage() without acknowledgement.
+     *
+     * Design note: the outer listenLoop() catches this RuntimeException via its broad
+     * {@code catch (Exception e)} block and calls sleepBeforeRetry(), so the listener thread
+     * survives. We cannot test listenLoop() directly here (it blocks indefinitely against a live
+     * MQ broker), but we verify the propagation contract that the outer catch relies on:
+     * processMessage() MUST throw when publish fails so the outer loop sees the exception.
+     */
+    @Test
+    void processMessage_throwsWhenPublisherFails_allowingOuterLoopToRecover() throws JMSException {
+        ClearingResult result = new ClearingResult("txn-005", "COMPLETED", "OK", "2024-01-01T00:00:00Z");
+        when(message.getStringProperty("traceparent")).thenReturn(null);
+        when(message.getStringProperty("transactionId")).thenReturn("txn-005");
+        when(message.getText()).thenReturn("{}");
+        when(clearingService.process("txn-005")).thenReturn(result);
+        doThrow(new RuntimeException("Kafka broker unavailable")).when(publisher).publish(any(ClearingResult.class));
+
+        // processMessage() must propagate the RuntimeException so listenLoop()'s
+        // catch (Exception e) block can log-and-retry rather than letting the thread die.
+        assertThrows(RuntimeException.class, () -> listener.processMessage(message));
+
+        verify(clearingService).process("txn-005");
+        verify(publisher).publish(result);
+        // Message must NOT be acknowledged — MQ will redeliver on the next connection.
+        verify(message, never()).acknowledge();
     }
 
 }

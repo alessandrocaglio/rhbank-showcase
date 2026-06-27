@@ -11,7 +11,10 @@ import org.springframework.jms.core.MessageCreator;
 
 import java.math.BigDecimal;
 
+import java.lang.reflect.Method;
+
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.notNull;
@@ -80,5 +83,12 @@ class MqPublishingServiceImplTest {
         assertThat(json).contains("txn-001");
         assertThat(json).contains("ACC-001");
         assertThat(json).contains("ACC-002");
+    }
+
+    @Test
+    void recoverMethod_existsWithCorrectSignature() throws NoSuchMethodException {
+        Method method = MqPublishingServiceImpl.class.getDeclaredMethod(
+            "recoverPublishToClearingQueue", Exception.class, TransactionLedger.class);
+        assertNotNull(method);
     }
 }
