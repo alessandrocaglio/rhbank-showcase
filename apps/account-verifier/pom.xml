@@ -61,12 +61,6 @@
             <artifactId>quarkus-jackson</artifactId>
         </dependency>
 
-        <!-- Shared gRPC stubs -->
-        <dependency>
-            <groupId>com.showcase</groupId>
-            <artifactId>grpc-api</artifactId>
-            <version>1.0.0-SNAPSHOT</version>
-        </dependency>
 
         <!-- Test dependencies -->
         <dependency>

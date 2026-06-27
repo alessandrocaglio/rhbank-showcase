@@ -5,14 +5,17 @@ import com.showcase.grpc.account.VerifyAccountResponse;
 import com.showcase.verifier.dto.VerificationResult;
 import com.showcase.verifier.service.AccountVerificationService;
 import io.grpc.stub.StreamObserver;
+import io.vertx.core.Future;
+import io.vertx.core.Vertx;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.math.BigDecimal;
+import java.util.concurrent.Callable;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -31,8 +34,27 @@ class AccountServiceGrpcImplTest {
     @Mock
     StreamObserver<VerifyAccountResponse> responseObserver;
 
+    @Mock
+    Vertx vertx;
+
     @InjectMocks
     AccountServiceGrpcImpl impl;
+
+    @BeforeEach
+    @SuppressWarnings("unchecked")
+    void configureVertx() {
+        // Execute the callable synchronously so tests don't need async coordination.
+        // Future.succeededFuture / failedFuture call onComplete handlers immediately
+        // when the future is already resolved.
+        when(vertx.executeBlocking(any(Callable.class))).thenAnswer(inv -> {
+            Callable<Object> callable = inv.getArgument(0);
+            try {
+                return Future.succeededFuture(callable.call());
+            } catch (Throwable t) {
+                return Future.failedFuture(t);
+            }
+        });
+    }
 
     private VerifyAccountRequest buildRequest(String txId, String source, String destination,
                                               double amount, String currency) {
@@ -55,7 +77,7 @@ class AccountServiceGrpcImplTest {
         impl.verifyAccount(buildRequest("TXN-001", "ACC-001", "ACC-002", 100.0, "USD"),
                 responseObserver);
 
-        ArgumentCaptor<VerifyAccountResponse> captor = ArgumentCaptor.forClass(VerifyAccountResponse.class);
+        var captor = org.mockito.ArgumentCaptor.forClass(VerifyAccountResponse.class);
         verify(responseObserver).onNext(captor.capture());
         verify(responseObserver).onCompleted();
 
@@ -74,7 +96,7 @@ class AccountServiceGrpcImplTest {
         impl.verifyAccount(buildRequest("TXN-002", "ACC-003", "ACC-001", 500.0, "EUR"),
                 responseObserver);
 
-        ArgumentCaptor<VerifyAccountResponse> captor = ArgumentCaptor.forClass(VerifyAccountResponse.class);
+        var captor = org.mockito.ArgumentCaptor.forClass(VerifyAccountResponse.class);
         verify(responseObserver).onNext(captor.capture());
         verify(responseObserver).onCompleted();
 

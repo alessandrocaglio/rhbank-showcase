@@ -2,6 +2,8 @@ package com.showcase.clearing.config;
 
 import org.junit.jupiter.api.Test;
 
+import java.util.Optional;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
@@ -18,8 +20,8 @@ class MqPropertiesTest {
         props.queueManager = "QM1";
         props.channel = "DEV.APP.SVRCONN";
         props.queueName = "DEV.QUEUE.CLEARING";
-        props.user = "mquser";
-        props.password = "secret";
+        props.user = Optional.of("mquser");
+        props.password = Optional.of("secret");
 
         assertEquals("mqhost", props.getHost());
         assertEquals(1414, props.getPort());
@@ -28,5 +30,20 @@ class MqPropertiesTest {
         assertEquals("DEV.QUEUE.CLEARING", props.getQueueName());
         assertEquals("mquser", props.getUser());
         assertEquals("secret", props.getPassword());
+    }
+
+    @Test
+    void getters_returnEmptyStringWhenOptionalAbsent() {
+        MqProperties props = new MqProperties();
+        props.host = "mqhost";
+        props.port = 1414;
+        props.queueManager = "QM1";
+        props.channel = "DEV.APP.SVRCONN";
+        props.queueName = "DEV.QUEUE.CLEARING";
+        props.user = Optional.empty();
+        props.password = Optional.empty();
+
+        assertEquals("", props.getUser());
+        assertEquals("", props.getPassword());
     }
 }

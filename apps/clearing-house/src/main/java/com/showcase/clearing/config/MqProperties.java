@@ -3,6 +3,8 @@ package com.showcase.clearing.config;
 import jakarta.enterprise.context.ApplicationScoped;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 
+import java.util.Optional;
+
 @ApplicationScoped
 public class MqProperties {
 
@@ -21,11 +23,11 @@ public class MqProperties {
     @ConfigProperty(name = "clearing.mq.queue-name")
     String queueName;
 
-    @ConfigProperty(name = "clearing.mq.user", defaultValue = "")
-    String user;
+    @ConfigProperty(name = "clearing.mq.user")
+    Optional<String> user;
 
-    @ConfigProperty(name = "clearing.mq.password", defaultValue = "")
-    String password;
+    @ConfigProperty(name = "clearing.mq.password")
+    Optional<String> password;
 
     public String getHost() {
         return host;
@@ -48,10 +50,10 @@ public class MqProperties {
     }
 
     public String getUser() {
-        return user;
+        return user.orElse("");
     }
 
     public String getPassword() {
-        return password;
+        return password.orElse("");
     }
 }
