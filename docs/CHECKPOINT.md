@@ -232,3 +232,149 @@ All services now run as podman containers. `./showcase.sh build && ./showcase.sh
 
 ### Tests
 All 19 Vitest tests pass (updated `PaymentsView.spec.js` selector for `<select>` sourceAccount).
+
+---
+
+## Session 2026-06-28 — Code Review, Bug Fixes & Quality Hardening
+
+### Current Test Counts (all pass)
+
+| Module | Tests | Change vs prev session |
+|---|---|---|
+| `grpc-api` | 3 | — |
+| `account-verifier` | 26 | +9 (outbox, pessimistic lock, validation, TOCTOU) |
+| `payment-gateway` | 29 | +2 (gRPC deadline, double→string proto) |
+| `transaction-engine` | 12 | +2 (idempotency, MDC cleanup) |
+| `clearing-house` | 14 | +1 (non-JMS exception recovery) |
+| `spa-mobile-app` | 23 | +4 (token refresh, EventSource close × 2, refreshToken × 2) |
+| **Total** | **107** | **+18** |
+
+Run all: `./showcase.sh test`
+
+---
+
+### What Was Done This Session
+
+#### 1. Full code review — 6 subagents (one per module + infra)
+- Produced `docs/CODE-REVIEW.md` with 27 graded findings (🔴 bug, 🟠 gap, 🟡 showcase blind-spot)
+- Created 27 individual task files in `docs/tasks/review/`
+
+#### 2. Bug fixes implemented via subagents
+
+| Task | Module | Fix |
+|---|---|---|
+| **R03** | account-verifier | Transactional outbox pattern — balance deduction and Kafka event now commit atomically. `OutboxPoller` (@Scheduled every 2s) reads `outbox_messages` and publishes to Kafka. V2+V3 migrations. |
+| **R04** | clearing-house | `AUTO_ACKNOWLEDGE` → `CLIENT_ACKNOWLEDGE` — MQ message only acked after successful Kafka publish |
+| **R05** | clearing-house | Broadened `catch` to `Exception` so Kafka failures don't kill the listener thread. Added `@PreDestroy` shutdown hook. |
+| **R06** | transaction-engine | Idempotency guard — `findByTransactionId` check before `save()` prevents PK violation on Kafka redeliver |
+| **R07** | transaction-engine | `@Retryable` on MQ publish (5 attempts, exponential back-off 1s→30s). `@Recover` logs when exhausted. |
+| **R08** | account-verifier | Input validation — blocks `amount ≤ 0`, blank accounts, self-transfers at top of `verify()` |
+| **R09** | account-verifier | Pessimistic lock (`PESSIMISTIC_WRITE`) on account read + `CHECK (balance >= 0)` DB constraint (V4 migration) |
+| **R13** | SPA | `refreshToken(30)` called before every payment fetch — no more silent 401 on near-expired token |
+| **R14** | SPA | `cleanup()` called in `onmessage` on COMPLETED/FAILED — EventSource closes cleanly, no spurious reconnects |
+| **R15** | proto / 3 modules | `amount` field: `double` → `string` in proto. `toPlainString()` on send, `new BigDecimal(str)` on receive. Exact decimal representation end-to-end. |
+| **R16** | transaction-engine | MDC `transactionId` wrapped in `try/finally` — no more bleed across Kafka consumer threads |
+| **R17** | payment-gateway | `withDeadlineAfter(5s)` on gRPC stub — configurable via `GRPC_ACCOUNT_VERIFIER_TIMEOUT_SECONDS` |
+
+#### 3. SPA improvements
+- Source account dropdown now shows all 4 test accounts with descriptive labels (`✓ Active`, `✗ Insufficient funds`, `✗ Rejected`)
+- `refreshToken` exposed from `useKeycloak` composable
+
+#### 4. showcase.sh improvements
+- `status` command rewritten: icon-decorated (🟢/🟡/🔴), grouped by Infrastructure/Application, uptime + URLs, summary tally
+- `test [module]` subcommand: runs all 6 suites (quiet by default, verbose on failure); supports single-module argument
+
+#### 5. Diagrams updated
+Both `diagrams/architecture.excalidraw` and `diagrams/payment-sequence.excalidraw` updated to reflect:
+- Outbox pattern (account-verifier → DB → async poller → Kafka)
+- MQ retry annotations
+- `CLIENT_ACKNOWLEDGE` semantics
+- SSE `CompletableFuture` bridge
+
+#### 6. New feature specs written
+- `docs/tasks/review/R28-dashboard-real-balance.md` — Real account balance via new `GetBalance` gRPC RPC + `GET /api/v1/accounts/me/balance`
+- `docs/tasks/review/R29-dashboard-transaction-history.md` — Transaction history via in-memory cache in payment-gateway + `GET /api/v1/transactions/recent`
+
+---
+
+### DB Migration History (accounts_db)
+
+| Version | File | What it does |
+|---|---|---|
+| V1 | `V1__init_accounts.sql` | Creates `accounts` table + seeds 4 accounts |
+| V2 | `V2__outbox.sql` | Creates `outbox_messages` table (transactional outbox, R03) |
+| V3 | `V3__outbox_sequence.sql` | Creates `outbox_messages_seq` (Hibernate 6 naming, INCREMENT BY 50) |
+| V4 | `V4__balance_nonneg_constraint.sql` | `CHECK (balance >= 0)` on `accounts` (R09) |
+
+---
+
+### Lessons Learned
+
+1. **Hibernate 6 sequence naming differs from PostgreSQL BIGSERIAL**: `BIGSERIAL` creates `<table>_id_seq`; Hibernate 6 looks for `<table>_seq`. When using Panache with `BIGSERIAL`, always create the Hibernate-expected sequence explicitly in a separate migration with `INCREMENT BY 50`.
+
+2. **`catch (Exception ex)` error messages can mislead**: The outbox catch block wrapped both serialization AND persist errors under "Failed to serialize payment event to outbox". The real error was a missing DB sequence. More specific per-statement try/catch would have surfaced the root cause immediately.
+
+3. **Concurrent subagents on the same Maven module**: R15 (proto) and R17 (gRPC deadline) both modified `payment-gateway` concurrently. They touched different source files so no conflict, but R15 proactively fixed the mock-chaining issue (`RETURNS_SELF`) that R17 would need. The agents naturally complemented each other.
+
+4. **`RETURNS_SELF` for final gRPC stub methods**: `withDeadlineAfter()` is `final` on `AbstractBlockingStub` — standard Mockito can't intercept it. `@Mock(answer = Answers.RETURNS_SELF)` is the correct pattern to keep method chaining working in tests.
+
+5. **`CLIENT_ACKNOWLEDGE` vs `AUTO_ACKNOWLEDGE` in JMS**: `AUTO_ACKNOWLEDGE` acks on `receive()` return (before processing). `CLIENT_ACKNOWLEDGE` gives application control — call `message.acknowledge()` only after the full processing chain succeeds. For at-least-once semantics, always use `CLIENT_ACKNOWLEDGE` when processing involves downstream I/O (Kafka publish in our case).
+
+6. **Proto `double` for money is a real bug, not just a style issue**: IEEE 754 double representation of `0.1` is not exact. Even the workaround `new BigDecimal(String.valueOf(double))` only partially compensates — the precision loss occurs at proto serialization. Only `string` (or `google.type.Money`) is safe for monetary amounts in proto.
+
+---
+
+### What To Do Next (priority order)
+
+#### High priority — demo-critical
+1. **R28** `docs/tasks/review/R28-dashboard-real-balance.md` — Real account balance in dashboard (needs V5 migration + new GetBalance gRPC RPC + new payment-gateway endpoint + SPA composable)
+2. **R29** `docs/tasks/review/R29-dashboard-transaction-history.md` — Transaction history list (in-memory cache in payment-gateway + GET /api/v1/transactions/recent + SPA dashboard update)
+3. **R01** `docs/tasks/review/R01-k8s-otel-collector-missing.md` — Deploy OTel Collector + Grafana + Tempo to K8s (critical: distributed tracing showcase is broken without this)
+4. **R02** `docs/tasks/review/R02-k8s-servicemesh-member-roll.md` — ServiceMeshMemberRoll (Istio sidecar injection inactive without it)
+
+#### Medium priority — K8s deployment correctness
+5. **R10** K8s SPA nginx runs as root → replace with `nginxinc/nginx-unprivileged`
+6. **R11** K8s payment-gateway JWT issuer mismatch — add `JWK_SET_URI` env var
+7. **R12** K8s spa-mobile-app `<cluster-domain>` placeholder — Kustomize overlay
+8. **R18** JWT not forwarded to gRPC downstream (CLAUDE.md non-negotiable requirement)
+9. **R19** K8s MCAUSER('app') missing from MQ ConfigMap
+10. **R20** Keycloak `directAccessGrantsEnabled` inconsistency Docker vs K8s
+11. **R21** CORS origin configurable via env var (hardcoded `localhost:3000` breaks OpenShift)
+12. **R22** K8s Redpanda as StatefulSet with PVC
+
+#### Lower priority — observability & polish
+13. **R23** Missing `bank.payment.transaction_id` on Kafka consumer spans
+14. **R24** Store `traceId` in ledger DB row
+15. **R25** Update ledger status from PENDING → CLEARED/FAILED
+16. **R26** PeerAuthentication mTLS STRICT mode
+17. **R27** Sanitise internal exception messages in gRPC error responses
+18. **T22** Run-project-locally task still in `docs/tasks/todo/`
+
+---
+
+### Quick-start for Next Session
+
+```bash
+cd /home/dev/Documents/redhat/labs/showcase
+
+# Verify everything still works
+./showcase.sh start
+./showcase.sh status
+./showcase.sh smoke       # must print "Full pipeline verified ✓"
+./showcase.sh test        # must print "All tests passed (6 modules)"
+
+# Browser
+open http://localhost:3000   # login: testuser / password
+# Try ACC-001 (success), ACC-003 (zero balance → FAILED), ACC-004 (suspended → FAILED)
+```
+
+### File Index for Next Session Context
+
+| File | Purpose |
+|---|---|
+| `docs/CODE-REVIEW.md` | Curated findings with severity grades — source of all R-tasks |
+| `docs/tasks/review/` | 27 individual task specs, not yet assigned to todo |
+| `docs/tasks/todo/` | Tasks ready to implement (check what's there at session start) |
+| `docs/tasks/done/` | Completed tasks — reference for what changed and why |
+| `diagrams/*.excalidraw` | Architecture diagrams — open in excalidraw.com |
+| `showcase.sh` | `build / start / stop / restart / status / logs [svc] / test [module] / smoke` |
