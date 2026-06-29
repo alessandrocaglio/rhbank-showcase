@@ -1,0 +1,11 @@
+showcase-apps deployed.
+
+Application routes:
+  SPA:             https://spa-mobile-app.{{ .Values.clusterDomain }}
+  Payment Gateway: https://payment-gateway.{{ .Values.clusterDomain }}
+
+Wait for all pods to be Running:
+  oc get pods -n {{ .Values.namespace }} -w
+
+Verify the end-to-end pipeline by opening the SPA in a browser and initiating a payment.
+Check distributed traces in Grafana Tempo.

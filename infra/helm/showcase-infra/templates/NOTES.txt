@@ -1,0 +1,13 @@
+showcase-infra deployed.
+
+Wait for all pods to be Running before installing showcase-apps:
+  oc get pods -n {{ .Values.namespace }} -w
+
+Keycloak admin console:
+  https://keycloak.{{ .Values.clusterDomain }}
+  User: {{ .Values.keycloak.adminUsername }} / <adminPassword>
+
+Next step:
+  helm install showcase-apps infra/helm/showcase-apps \
+    --namespace {{ .Values.namespace }} \
+    --set clusterDomain={{ .Values.clusterDomain }}

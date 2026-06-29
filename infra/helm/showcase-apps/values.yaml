@@ -1,0 +1,110 @@
+namespace: showcase
+clusterDomain: ""  # required — e.g. apps.mycluster.example.com
+
+images:
+  registry: quay.io/acaglio
+  tag: latest
+  pullPolicy: Always
+
+kafka:
+  # The Redpanda service name follows the pattern <helm-release-name>-redpanda.
+  # If showcase-infra was installed with release name "showcase-infra", use "showcase-infra-redpanda:9092".
+  bootstrapServers: showcase-infra-redpanda:9092
+  topics:
+    paymentApproved: payment-approved
+    paymentApprovedDlt: payment-approved.DLT
+    paymentCompleted: payment-completed
+    paymentCompletedDlt: payment-completed.DLT
+  consumerGroups:
+    paymentGateway: payment-gateway-group
+    transactionEngine: transaction-engine-group
+
+ibmmq:
+  # IBM MQ Operator creates a Service named <queuemanager-name-lowercase>-ibm-mq on port 1414.
+  # With the default QM1 from showcase-infra, the hostname is qm1-ibm-mq.
+  host: qm1-ibm-mq
+  port: 1414
+  queueManager: QM1
+  channel: DEV.APP.SVRCONN
+  queue: DEV.QUEUE.CLEARING
+  deadLetterQueue: DEV.DEAD.LETTER.QUEUE
+  user: ""
+  password: ""
+
+postgres:
+  accountVerifier:
+    url: jdbc:postgresql://postgres:5432/accounts_db
+    username: appuser
+    password: apppassword
+  transactionEngine:
+    url: jdbc:postgresql://postgres:5432/ledger_db
+    username: appuser
+    password: apppassword
+
+keycloak:
+  realm: BankDemoRealm
+  # externalUrl: if set, used for KEYCLOAK_URL env var and issuer URI.
+  # Defaults to https://keycloak.{{ .Values.clusterDomain }}
+  externalUrl: ""
+  # jwkSetUri: if set, overrides the JWK set URI for payment-gateway.
+  # Defaults to the internal cluster-local URL for faster validation (avoids external round-trip).
+  jwkSetUri: ""
+
+grpc:
+  accountVerifier:
+    address: static://account-verifier:9090
+    timeoutSeconds: 5
+
+cors:
+  # allowedOrigins: if set, overrides the CORS allowed origins for payment-gateway.
+  # Defaults to https://spa-mobile-app.{{ .Values.clusterDomain }}
+  allowedOrigins: ""
+
+serviceMesh:
+  enabled: true
+  memberRollName: default
+
+otel:
+  collectorEndpoint: http://otel-collector:4317  # override with actual OTel Collector Service name
+
+clearingHouse:
+  simulation:
+    delayMsMin: 100
+    delayMsMax: 500
+
+resources:
+  accountVerifier:
+    requests:
+      memory: 256Mi
+      cpu: 100m
+    limits:
+      memory: 512Mi
+      cpu: 500m
+  paymentGateway:
+    requests:
+      memory: 256Mi
+      cpu: 100m
+    limits:
+      memory: 512Mi
+      cpu: 500m
+  transactionEngine:
+    requests:
+      memory: 256Mi
+      cpu: 100m
+    limits:
+      memory: 512Mi
+      cpu: 500m
+  clearingHouse:
+    requests:
+      memory: 256Mi
+      cpu: 100m
+    limits:
+      memory: 512Mi
+      cpu: 500m
+  spaMobileApp:
+    requests:
+      memory: 64Mi
+      cpu: 50m
+    limits:
+      memory: 128Mi
+      cpu: 200m

@@ -1,0 +1,101 @@
+apiVersion: k8s.keycloak.org/v2alpha1
+kind: KeycloakRealmImport
+metadata:
+  name: showcase-realm
+  namespace: {{ .Values.namespace }}
+  labels:
+    app: keycloak
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version }}
+spec:
+  keycloakCRName: keycloak
+  realm:
+    realm: {{ .Values.keycloak.realm }}
+    enabled: true
+    displayName: "Bank Demo Realm"
+    sslRequired: "external"
+    registrationAllowed: false
+    loginWithEmailAllowed: true
+    duplicateEmailsAllowed: false
+    resetPasswordAllowed: false
+    editUsernameAllowed: false
+    bruteForceProtected: false
+    roles:
+      realm:
+        - name: payment-init
+          description: "Permission to initiate payment transactions"
+          composite: false
+          clientRole: false
+          containerId: {{ .Values.keycloak.realm }}
+    clients:
+      - clientId: spa-payment-client
+        name: "SPA Payment Client"
+        description: "Public PKCE client for the spa-mobile-app frontend"
+        enabled: true
+        publicClient: true
+        standardFlowEnabled: true
+        implicitFlowEnabled: false
+        directAccessGrantsEnabled: true
+        serviceAccountsEnabled: false
+        authorizationServicesEnabled: false
+        protocol: openid-connect
+        redirectUris:
+          - "http://localhost:3000/*"
+          - "http://localhost/*"
+          - {{ printf "https://spa-mobile-app.%s/*" .Values.clusterDomain | quote }}
+        webOrigins:
+          - "+"
+        postLogoutRedirectUris:
+          - "http://localhost:3000/*"
+        attributes:
+          pkce.code.challenge.method: "S256"
+          post.logout.redirect.uris: "http://localhost:3000/*"
+        defaultClientScopes:
+          - web-origins
+          - acr
+          - roles
+          - profile
+          - email
+        optionalClientScopes:
+          - address
+          - phone
+          - offline_access
+          - microprofile-jwt
+      - clientId: backend-gateway-service
+        name: "Backend Gateway Service"
+        description: "Bearer-only client used by payment-gateway for JWKS validation"
+        enabled: true
+        publicClient: false
+        bearerOnly: true
+        standardFlowEnabled: false
+        implicitFlowEnabled: false
+        directAccessGrantsEnabled: false
+        serviceAccountsEnabled: false
+        authorizationServicesEnabled: false
+        protocol: openid-connect
+        redirectUris: []
+        webOrigins: []
+        defaultClientScopes:
+          - web-origins
+          - acr
+          - roles
+          - profile
+          - email
+        optionalClientScopes:
+          - address
+          - phone
+          - offline_access
+          - microprofile-jwt
+    users:
+      - username: testuser
+        enabled: true
+        emailVerified: true
+        firstName: Test
+        lastName: User
+        email: testuser@bankdemo.local
+        credentials:
+          - type: password
+            value: "password"
+            temporary: false
+        realmRoles:
+          - payment-init
+        clientRoles: {}

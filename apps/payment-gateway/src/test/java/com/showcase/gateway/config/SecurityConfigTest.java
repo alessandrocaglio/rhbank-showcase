@@ -10,12 +10,15 @@ import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
+import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import java.time.Instant;
@@ -50,6 +53,9 @@ class SecurityConfigTest {
 
     @Autowired
     private JwtAuthenticationConverter jwtAuthenticationConverter;
+
+    @Autowired
+    private CorsConfigurationSource corsConfigurationSource;
 
     @MockBean
     private PaymentService paymentService;
@@ -209,5 +215,54 @@ class SecurityConfigTest {
         var token = jwtAuthenticationConverter.convert(jwt);
 
         assertThat(token.getAuthorities()).isEmpty();
+    }
+
+    // -------------------------------------------------------------------------
+    // CORS wiring tests — verify that app.cors.allowed-origins is injected
+    // correctly from the environment variable backing.
+    // -------------------------------------------------------------------------
+
+    /**
+     * With the default property value (no override), the CORS config must
+     * permit exactly "http://localhost:3000".
+     */
+    @Test
+    void corsConfigurationSource_defaultOriginIsLocalhost3000() {
+        var corsConfig = corsConfigurationSource
+                .getCorsConfiguration(new MockHttpServletRequest());
+
+        assertThat(corsConfig).isNotNull();
+        assertThat(corsConfig.getAllowedOrigins())
+                .containsExactly("http://localhost:3000");
+    }
+
+    /**
+     * When app.cors.allowed-origins is set to a comma-separated list (simulating
+     * what Helm injects in OpenShift), the CORS config must split on commas and
+     * trim whitespace, yielding both origins.
+     */
+    @WebMvcTest(controllers = PaymentController.class)
+    @Import({SecurityConfig.class, GlobalExceptionHandler.class, MockJwtDecoderConfig.class})
+    @TestPropertySource(properties = "app.cors.allowed-origins=https://a.com, https://b.com")
+    static class MultiOriginCorsTest {
+
+        @Autowired
+        private CorsConfigurationSource corsConfigurationSource;
+
+        @MockBean
+        private PaymentService paymentService;
+
+        @MockBean
+        private SseEmitterService sseEmitterService;
+
+        @Test
+        void corsConfigurationSource_multipleOriginsAreSplit() {
+            var corsConfig = corsConfigurationSource
+                    .getCorsConfiguration(new MockHttpServletRequest());
+
+            assertThat(corsConfig).isNotNull();
+            assertThat(corsConfig.getAllowedOrigins())
+                    .containsExactlyInAnyOrder("https://a.com", "https://b.com");
+        }
     }
 }

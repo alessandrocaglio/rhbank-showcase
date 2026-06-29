@@ -1,0 +1,81 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: transaction-engine
+  namespace: {{ .Values.namespace }}
+  labels:
+    app: transaction-engine
+    app.kubernetes.io/name: transaction-engine
+    app.kubernetes.io/version: {{ .Values.images.tag | quote }}
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: transaction-engine
+  template:
+    metadata:
+      labels:
+        app: transaction-engine
+        app.kubernetes.io/name: transaction-engine
+        sidecar.istio.io/inject: "true"
+    spec:
+      containers:
+        - name: transaction-engine
+          image: {{ .Values.images.registry }}/transaction-engine:{{ .Values.images.tag }}
+          imagePullPolicy: {{ .Values.images.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: 8080
+          env:
+            {{- include "showcase.otelEnv" (dict "root" . "serviceName" "transaction-engine") | nindent 12 }}
+            - name: SPRING_DATASOURCE_URL
+              value: {{ .Values.postgres.transactionEngine.url | quote }}
+            - name: SPRING_DATASOURCE_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-app-secret
+                  key: username
+            - name: SPRING_DATASOURCE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-app-secret
+                  key: password
+            - name: SPRING_KAFKA_BOOTSTRAP_SERVERS
+              value: {{ .Values.kafka.bootstrapServers | quote }}
+            - name: SPRING_KAFKA_CONSUMER_GROUP_ID
+              value: {{ .Values.kafka.consumerGroups.transactionEngine | quote }}
+            - name: APP_KAFKA_TOPICS_PAYMENT_APPROVED
+              value: {{ .Values.kafka.topics.paymentApproved | quote }}
+            - name: APP_KAFKA_TOPICS_PAYMENT_APPROVED_DLT
+              value: {{ .Values.kafka.topics.paymentApprovedDlt | quote }}
+            - name: APP_MQ_QUEUES_CLEARING
+              value: {{ .Values.ibmmq.queue | quote }}
+            - name: APP_MQ_QUEUES_DEAD_LETTER
+              value: {{ .Values.ibmmq.deadLetterQueue | quote }}
+            - name: IBM_MQ_CONN_NAME
+              value: {{ include "showcase.mqConnName" . | quote }}
+            - name: IBM_MQ_QUEUE_MANAGER
+              value: {{ .Values.ibmmq.queueManager | quote }}
+            - name: IBM_MQ_CHANNEL
+              value: {{ .Values.ibmmq.channel | quote }}
+            - name: IBM_MQ_USER
+              value: {{ .Values.ibmmq.user | quote }}
+            - name: IBM_MQ_PASSWORD
+              value: {{ .Values.ibmmq.password | quote }}
+            - name: SERVER_PORT
+              value: "8080"
+          readinessProbe:
+            httpGet:
+              path: /actuator/health/readiness
+              port: 8080
+            initialDelaySeconds: 40
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /actuator/health/liveness
+              port: 8080
+            initialDelaySeconds: 90
+            periodSeconds: 15
+          resources:
+            {{- toYaml .Values.resources.transactionEngine | nindent 12 }}

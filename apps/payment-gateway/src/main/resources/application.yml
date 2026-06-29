@@ -6,6 +6,7 @@ spring:
       resourceserver:
         jwt:
           issuer-uri: ${SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI:http://localhost:8080/realms/BankDemoRealm}
+          jwk-set-uri: ${SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK_SET_URI:}
   kafka:
     bootstrap-servers: ${SPRING_KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
     consumer:
@@ -34,6 +35,8 @@ server:
   port: ${SERVER_PORT:8080}
 
 app:
+  cors:
+    allowed-origins: ${APP_CORS_ALLOWED_ORIGINS:http://localhost:3000}
   grpc:
     account-verifier-timeout-seconds: ${GRPC_ACCOUNT_VERIFIER_TIMEOUT_SECONDS:5}
   kafka:

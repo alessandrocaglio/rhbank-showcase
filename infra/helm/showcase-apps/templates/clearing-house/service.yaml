@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: clearing-house
+  namespace: {{ .Values.namespace }}
+  labels:
+    app: clearing-house
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version }}
+spec:
+  type: ClusterIP
+  selector:
+    app: clearing-house
+  ports:
+    - name: http
+      port: 8080
+      targetPort: 8080

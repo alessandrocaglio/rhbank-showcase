@@ -1,0 +1,12 @@
+{{- if .Values.serviceMesh.enabled }}
+apiVersion: security.istio.io/v1beta1
+kind: PeerAuthentication
+metadata:
+  name: showcase-mtls
+  namespace: {{ .Values.namespace }}
+  labels:
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version }}
+spec:
+  mtls:
+    mode: STRICT
+{{- end }}

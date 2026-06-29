@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: payment-gateway
+  namespace: {{ .Values.namespace }}
+  labels:
+    app: payment-gateway
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version }}
+spec:
+  type: ClusterIP
+  selector:
+    app: payment-gateway
+  ports:
+    - name: http
+      port: 8080
+      targetPort: 8080

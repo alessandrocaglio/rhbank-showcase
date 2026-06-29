@@ -1,0 +1,71 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: clearing-house
+  namespace: {{ .Values.namespace }}
+  labels:
+    app: clearing-house
+    app.kubernetes.io/name: clearing-house
+    app.kubernetes.io/version: {{ .Values.images.tag | quote }}
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: clearing-house
+  template:
+    metadata:
+      labels:
+        app: clearing-house
+        app.kubernetes.io/name: clearing-house
+        sidecar.istio.io/inject: "true"
+    spec:
+      containers:
+        - name: clearing-house
+          image: {{ .Values.images.registry }}/clearing-house:{{ .Values.images.tag }}
+          imagePullPolicy: {{ .Values.images.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: 8080
+          env:
+            {{- include "showcase.otelEnv" (dict "root" . "serviceName" "clearing-house") | nindent 12 }}
+            - name: KAFKA_BOOTSTRAP_SERVERS
+              value: {{ .Values.kafka.bootstrapServers | quote }}
+            - name: KAFKA_TOPIC_PAYMENT_COMPLETED
+              value: {{ .Values.kafka.topics.paymentCompleted | quote }}
+            - name: KAFKA_TOPIC_PAYMENT_COMPLETED_DLT
+              value: {{ .Values.kafka.topics.paymentCompletedDlt | quote }}
+            - name: IBM_MQ_HOST
+              value: {{ .Values.ibmmq.host | quote }}
+            - name: IBM_MQ_PORT
+              value: {{ .Values.ibmmq.port | quote }}
+            - name: IBM_MQ_QUEUE_MANAGER
+              value: {{ .Values.ibmmq.queueManager | quote }}
+            - name: IBM_MQ_CHANNEL
+              value: {{ .Values.ibmmq.channel | quote }}
+            - name: IBM_MQ_QUEUE_NAME
+              value: {{ .Values.ibmmq.queue | quote }}
+            - name: IBM_MQ_USER
+              value: {{ .Values.ibmmq.user | quote }}
+            - name: IBM_MQ_PASSWORD
+              value: {{ .Values.ibmmq.password | quote }}
+            - name: CLEARING_SIMULATION_DELAY_MS_MIN
+              value: {{ .Values.clearingHouse.simulation.delayMsMin | quote }}
+            - name: CLEARING_SIMULATION_DELAY_MS_MAX
+              value: {{ .Values.clearingHouse.simulation.delayMsMax | quote }}
+            - name: QUARKUS_HTTP_PORT
+              value: "8080"
+          readinessProbe:
+            httpGet:
+              path: /q/health/ready
+              port: 8080
+            initialDelaySeconds: 30
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /q/health/live
+              port: 8080
+            initialDelaySeconds: 60
+            periodSeconds: 15
+          resources:
+            {{- toYaml .Values.resources.clearingHouse | nindent 12 }}

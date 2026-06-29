@@ -1,0 +1,18 @@
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: payment-gateway
+  namespace: {{ .Values.namespace }}
+  labels:
+    app: payment-gateway
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version }}
+spec:
+  host: payment-gateway.{{ .Values.clusterDomain }}
+  tls:
+    termination: edge
+    insecureEdgeTerminationPolicy: Redirect
+  to:
+    kind: Service
+    name: payment-gateway
+  port:
+    targetPort: http

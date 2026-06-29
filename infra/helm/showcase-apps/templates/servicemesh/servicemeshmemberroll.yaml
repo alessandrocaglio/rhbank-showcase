@@ -1,0 +1,12 @@
+{{- if .Values.serviceMesh.enabled }}
+apiVersion: maistra.io/v1
+kind: ServiceMeshMemberRoll
+metadata:
+  name: {{ .Values.serviceMesh.memberRollName }}
+  namespace: istio-system
+  labels:
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version }}
+spec:
+  members:
+    - {{ .Values.namespace }}
+{{- end }}

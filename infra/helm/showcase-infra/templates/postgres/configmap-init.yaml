@@ -1,0 +1,31 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: postgres-init-config
+  namespace: {{ .Values.namespace }}
+  labels:
+    app: postgres
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version }}
+data:
+  init.sql: |
+    -- =============================================================================
+    -- postgres-init.sql
+    -- Runs once on first PostgreSQL container start (docker-entrypoint-initdb.d).
+    -- Creates application databases, shared app user, and grants required privileges.
+    -- =============================================================================
+
+    CREATE DATABASE {{ .Values.postgres.databases.accounts | default "accounts_db" }};
+    CREATE DATABASE {{ .Values.postgres.databases.ledger | default "ledger_db" }};
+
+    CREATE USER {{ .Values.postgres.appUsername }} WITH PASSWORD '{{ .Values.postgres.appPassword }}';
+
+    GRANT ALL PRIVILEGES ON DATABASE {{ .Values.postgres.databases.accounts | default "accounts_db" }} TO {{ .Values.postgres.appUsername }};
+    GRANT ALL PRIVILEGES ON DATABASE {{ .Values.postgres.databases.ledger | default "ledger_db" }} TO {{ .Values.postgres.appUsername }};
+
+    -- Required for Flyway schema management in accounts_db
+    \c {{ .Values.postgres.databases.accounts | default "accounts_db" }};
+    GRANT ALL ON SCHEMA public TO {{ .Values.postgres.appUsername }};
+
+    -- Required for Flyway schema management in ledger_db
+    \c {{ .Values.postgres.databases.ledger | default "ledger_db" }};
+    GRANT ALL ON SCHEMA public TO {{ .Values.postgres.appUsername }};

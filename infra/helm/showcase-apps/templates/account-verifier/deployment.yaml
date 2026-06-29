@@ -1,0 +1,69 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: account-verifier
+  namespace: {{ .Values.namespace }}
+  labels:
+    app: account-verifier
+    app.kubernetes.io/name: account-verifier
+    app.kubernetes.io/version: {{ .Values.images.tag | quote }}
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: account-verifier
+  template:
+    metadata:
+      labels:
+        app: account-verifier
+        app.kubernetes.io/name: account-verifier
+        sidecar.istio.io/inject: "true"
+    spec:
+      containers:
+        - name: account-verifier
+          image: {{ .Values.images.registry }}/account-verifier:{{ .Values.images.tag }}
+          imagePullPolicy: {{ .Values.images.pullPolicy }}
+          ports:
+            - name: grpc
+              containerPort: 9090
+            - name: http
+              containerPort: 8080
+          env:
+            {{- include "showcase.otelEnv" (dict "root" . "serviceName" "account-verifier") | nindent 12 }}
+            - name: QUARKUS_DATASOURCE_JDBC_URL
+              value: {{ .Values.postgres.accountVerifier.url | quote }}
+            - name: QUARKUS_DATASOURCE_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-app-secret
+                  key: username
+            - name: QUARKUS_DATASOURCE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-app-secret
+                  key: password
+            - name: KAFKA_BOOTSTRAP_SERVERS
+              value: {{ .Values.kafka.bootstrapServers | quote }}
+            - name: KAFKA_TOPIC_PAYMENT_APPROVED
+              value: {{ .Values.kafka.topics.paymentApproved | quote }}
+            - name: KAFKA_TOPIC_PAYMENT_APPROVED_DLT
+              value: {{ .Values.kafka.topics.paymentApprovedDlt | quote }}
+            - name: QUARKUS_GRPC_SERVER_PORT
+              value: "9090"
+            - name: QUARKUS_HTTP_PORT
+              value: "8080"
+          readinessProbe:
+            httpGet:
+              path: /q/health/ready
+              port: 8080
+            initialDelaySeconds: 30
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /q/health/live
+              port: 8080
+            initialDelaySeconds: 60
+            periodSeconds: 15
+          resources:
+            {{- toYaml .Values.resources.accountVerifier | nindent 12 }}

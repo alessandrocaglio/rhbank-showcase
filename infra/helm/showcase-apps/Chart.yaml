@@ -1,0 +1,6 @@
+apiVersion: v2
+name: showcase-apps
+description: Application microservices for the observability showcase
+type: application
+version: 1.0.0
+appVersion: "1.0.0"

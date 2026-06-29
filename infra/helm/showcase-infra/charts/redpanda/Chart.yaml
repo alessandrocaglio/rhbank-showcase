@@ -1,0 +1,4 @@
+apiVersion: v2
+name: redpanda
+description: Stub for local lint/template testing — replace with real chart via helm dependency update
+version: 5.9.19

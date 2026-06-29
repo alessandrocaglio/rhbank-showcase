@@ -1,0 +1,53 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: spa-mobile-app
+  namespace: {{ .Values.namespace }}
+  labels:
+    app: spa-mobile-app
+    app.kubernetes.io/name: spa-mobile-app
+    app.kubernetes.io/version: {{ .Values.images.tag | quote }}
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: spa-mobile-app
+  template:
+    metadata:
+      labels:
+        app: spa-mobile-app
+        app.kubernetes.io/name: spa-mobile-app
+        sidecar.istio.io/inject: "true"
+    spec:
+      containers:
+        - name: spa-mobile-app
+          image: {{ .Values.images.registry }}/spa-mobile-app:{{ .Values.images.tag }}
+          imagePullPolicy: {{ .Values.images.pullPolicy }}
+          ports:
+            - name: http
+              # nginx-unprivileged listens on 8080 (non-root)
+              containerPort: 8080
+          env:
+            - name: KEYCLOAK_URL
+              value: {{ include "showcase.keycloakExternalUrl" . | quote }}
+            - name: KEYCLOAK_REALM
+              value: {{ .Values.keycloak.realm | quote }}
+            - name: KEYCLOAK_CLIENT_ID
+              value: "spa-payment-client"
+            - name: API_BASE_URL
+              value: {{ printf "https://payment-gateway.%s" .Values.clusterDomain | quote }}
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 8080
+            initialDelaySeconds: 5
+            periodSeconds: 5
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 8080
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          resources:
+            {{- toYaml .Values.resources.spaMobileApp | nindent 12 }}

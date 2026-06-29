@@ -1,0 +1,30 @@
+apiVersion: mq.ibm.com/v1beta1
+kind: QueueManager
+metadata:
+  name: {{ .Values.ibmmq.queueManager | lower }}
+  namespace: {{ .Values.namespace }}
+  labels:
+    app: ibmmq
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version }}
+spec:
+  license:
+    accept: true
+    license: {{ .Values.ibmmq.license }}
+    use: {{ .Values.ibmmq.licenseUse }}
+    metric: {{ .Values.ibmmq.licenseMetric }}
+  queueManager:
+    name: {{ .Values.ibmmq.queueManager }}
+    image: {{ .Values.ibmmq.image }}
+    imagePullPolicy: {{ .Values.ibmmq.imagePullPolicy }}
+    storage:
+      queueManager:
+        type: persistent-claim
+        storageClassName: {{ .Values.storageClass }}
+        size: {{ .Values.ibmmq.storageSize }}
+    mqsc:
+      - configMap:
+          name: ibmmq-mqsc-config
+          items:
+            - config.mqsc
+  web:
+    enabled: false

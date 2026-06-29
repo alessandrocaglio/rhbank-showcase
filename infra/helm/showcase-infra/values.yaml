@@ -1,0 +1,71 @@
+namespace: showcase
+storageClass: thin-csi
+clusterDomain: ""  # required — e.g. apps.mycluster.example.com
+
+postgres:
+  image: docker.io/library/postgres:16-alpine
+  imagePullPolicy: IfNotPresent
+  storageSize: 2Gi
+  superuserPassword: postgrespassword
+  appUsername: appuser
+  appPassword: apppassword
+  databases:
+    accounts: accounts_db
+    ledger: ledger_db
+
+keycloak:
+  instances: 1
+  adminUsername: admin
+  adminPassword: admin
+  realm: BankDemoRealm
+
+ibmmq:
+  # IBM MQ Operator creates a Service named <queuemanager-name-lowercase>-ibm-mq on port 1414.
+  # With queueManager=QM1 the service hostname is qm1-ibm-mq:1414.
+  # Update showcase-apps values.ibmmq.host accordingly if you change queueManager here.
+  queueManager: QM1
+  channel: DEV.APP.SVRCONN
+  queue: DEV.QUEUE.CLEARING
+  deadLetterQueue: DEV.DEAD.LETTER.QUEUE
+  storageSize: 2Gi
+  user: app
+  password: ""
+  image: icr.io/ibm-messaging/mq:9.3.5.1-r2
+  imagePullPolicy: Always
+  # Licence — confirm the correct string with your cluster admin before install.
+  # L-EHDC-BMK7JF = IBM MQ Advanced for Developers (community image).
+  license: L-EHDC-BMK7JF
+  licenseUse: NonProduction  # Production | NonProduction
+  licenseMetric: VirtualProcessorCore
+
+redpanda:
+  enabled: true
+  statefulset:
+    replicas: 1
+  storage:
+    persistentVolume:
+      enabled: true
+      size: 5Gi
+      storageClass: thin-csi
+  tls:
+    enabled: false
+  auth:
+    sasl:
+      enabled: false
+  listeners:
+    kafka:
+      port: 9092
+  resources:
+    cpu:
+      cores: 1
+    memory:
+      container:
+        max: 1Gi
+  topicsJob:
+    image: docker.redpanda.com/redpandadata/redpanda:v24.2.7
+    imagePullPolicy: IfNotPresent
+  topics:
+    paymentApproved: payment-approved
+    paymentApprovedDlt: payment-approved.DLT
+    paymentCompleted: payment-completed
+    paymentCompletedDlt: payment-completed.DLT

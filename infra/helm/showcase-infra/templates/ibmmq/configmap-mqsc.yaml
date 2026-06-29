@@ -1,0 +1,32 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: ibmmq-mqsc-config
+  namespace: {{ .Values.namespace }}
+  labels:
+    app: ibmmq
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version }}
+data:
+  config.mqsc: |
+    * =============================================================================
+    * config.mqsc — IBM MQ Queue Manager startup script
+    * Mounted to /etc/mqm/config.mqsc and executed automatically on container start.
+    * Configures the server-connection channel, queues, dead-letter queue,
+    * and disables channel authentication for the showcase environment.
+    * =============================================================================
+
+    DEFINE CHANNEL({{ .Values.ibmmq.channel }}) CHLTYPE(SVRCONN) TRPTYPE(TCP) REPLACE
+
+    ALTER CHANNEL({{ .Values.ibmmq.channel }}) CHLTYPE(SVRCONN) MCAUSER('{{ .Values.ibmmq.user }}')
+
+    DEFINE QLOCAL({{ .Values.ibmmq.queue }}) REPLACE
+
+    DEFINE QLOCAL({{ .Values.ibmmq.deadLetterQueue }}) REPLACE
+
+    ALTER QMGR DEADQ({{ .Values.ibmmq.deadLetterQueue }})
+
+    ALTER QMGR CHLAUTH(DISABLED)
+
+    ALTER AUTHINFO(SYSTEM.DEFAULT.AUTHINFO.IDPWOS) AUTHTYPE(IDPWOS) ADOPTCTX(YES) CHCKCLNT(OPTIONAL) CHCKLOCL(OPTIONAL) AUTHENMD(OS)
+
+    REFRESH SECURITY TYPE(CONNAUTH)
