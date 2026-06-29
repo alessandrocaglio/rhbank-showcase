@@ -113,6 +113,28 @@ class AccountServiceGrpcImplTest {
         impl.verifyAccount(buildRequest("TXN-003", "ACC-001", "ACC-002", "10.00", "USD"),
                 responseObserver);
 
-        verify(responseObserver).onError(any());
+        var errorCaptor = org.mockito.ArgumentCaptor.forClass(Throwable.class);
+        verify(responseObserver).onError(errorCaptor.capture());
+        var sre = (io.grpc.StatusRuntimeException) errorCaptor.getValue();
+        assertEquals(io.grpc.Status.Code.INTERNAL, sre.getStatus().getCode());
+        assertEquals("Account verification failed. See server logs.", sre.getStatus().getDescription());
+        assertFalse(sre.getStatus().getDescription().contains("Unexpected DB error"));
+    }
+
+    @Test
+    void shouldNotLeakExceptionMessageOnInternalError() {
+        when(verificationService.verify(any(), any(), any(), any(), any()))
+                .thenThrow(new RuntimeException("SELECT * FROM accounts WHERE id = 'ACC-001'; -- internal detail"));
+
+        impl.verifyAccount(buildRequest("TXN-004", "ACC-001", "ACC-002", "50.00", "USD"),
+                responseObserver);
+
+        var errorCaptor = org.mockito.ArgumentCaptor.forClass(Throwable.class);
+        verify(responseObserver).onError(errorCaptor.capture());
+        var sre = (io.grpc.StatusRuntimeException) errorCaptor.getValue();
+        assertEquals(io.grpc.Status.Code.INTERNAL, sre.getStatus().getCode());
+        assertEquals("Account verification failed. See server logs.", sre.getStatus().getDescription());
+        assertFalse(sre.getStatus().getDescription().contains("SELECT"));
+        assertFalse(sre.getStatus().getDescription().contains("ACC-001"));
     }
 }

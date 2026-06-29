@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # showcase.sh — single-command control for the observability showcase stack
-# Usage: ./showcase.sh {build|start|stop|restart|status|logs|smoke|test}
+# Usage: ./showcase.sh {build|start|stop|restart|status|logs|smoke|test|push}
 
 set -euo pipefail
 IFS=$'\n\t'
@@ -305,6 +305,101 @@ cmd_test() {
   fi
 }
 
+# ── Push ──────────────────────────────────────────────────────────────────────
+
+cmd_push() {
+  local target="${1:-all}"
+  local all_images=(payment-gateway account-verifier transaction-engine clearing-house spa-mobile-app)
+  local images=()
+
+  if [[ "$target" == "all" ]]; then
+    images=("${all_images[@]}")
+  else
+    # Validate the requested service name
+    local found=0
+    for svc in "${all_images[@]}"; do
+      if [[ "$svc" == "$target" ]]; then
+        found=1
+        break
+      fi
+    done
+    if [[ $found -eq 0 ]]; then
+      fail "Unknown service: '$target'"
+      echo "  Valid names: ${all_images[*]}" >&2
+      exit 1
+    fi
+    images=("$target")
+  fi
+
+  # Derive version tag from git short hash
+  local git_hash
+  git_hash=$(git -C "$SCRIPT_DIR" rev-parse --short HEAD 2>/dev/null || echo "unknown")
+  log "Image version tag: ${git_hash}"
+
+  # Ensure JARs exist for Java services before building images
+  local java_services=(payment-gateway account-verifier transaction-engine clearing-house)
+  local need_build=0
+  for svc in "${images[@]}"; do
+    for jsvc in "${java_services[@]}"; do
+      if [[ "$svc" == "$jsvc" ]]; then
+        need_build=1
+        break
+      fi
+    done
+    [[ $need_build -eq 1 ]] && break
+  done
+
+  if [[ $need_build -eq 1 ]] && ! jars_exist 2>/dev/null; then
+    warn "JARs missing — running Maven build first..."
+    step "Building Java modules"
+    JAVA_HOME="$JAVA_HOME" "$MVNW" clean package -DskipTests
+    ok "Maven build complete"
+  fi
+
+  local built=() failed_build=() failed_push=()
+
+  for svc in "${images[@]}"; do
+    local img_latest="quay.io/acaglio/${svc}:latest"
+    local img_versioned="quay.io/acaglio/${svc}:${git_hash}"
+    step "Building ${img_versioned}"
+    # Build with the versioned tag, then also tag as latest
+    if podman build \
+        --tag "${img_versioned}" \
+        --tag "${img_latest}" \
+        "$SCRIPT_DIR/apps/$svc/"; then
+      ok "$svc image built (${git_hash} + latest)"
+      built+=("$svc")
+    else
+      fail "podman build failed for $svc"
+      failed_build+=("$svc")
+    fi
+  done
+
+  if [[ ${#built[@]} -gt 0 ]]; then
+    step "Pushing images to quay.io/acaglio"
+    for svc in "${built[@]}"; do
+      local img_latest="quay.io/acaglio/${svc}:latest"
+      local img_versioned="quay.io/acaglio/${svc}:${git_hash}"
+      log "Pushing $svc (${git_hash})..."
+      if podman push "${img_versioned}" && podman push "${img_latest}"; then
+        ok "$svc pushed (${git_hash} + latest)"
+      else
+        fail "podman push failed for $svc"
+        failed_push+=("$svc")
+      fi
+    done
+  fi
+
+  echo ""
+  if [[ ${#failed_build[@]} -eq 0 && ${#failed_push[@]} -eq 0 ]]; then
+    ok "All images built and pushed (${#built[@]} services, tag: ${git_hash})"
+  else
+    [[ ${#failed_build[@]} -gt 0 ]] && fail "Build failed: ${failed_build[*]}"
+    [[ ${#failed_push[@]} -gt 0 ]] && fail "Push failed: ${failed_push[*]}"
+    exit 1
+  fi
+}
+
 # ── Dispatch ──────────────────────────────────────────────────────────────────
 case "${1:-help}" in
   build)   cmd_build   ;;
@@ -315,6 +410,7 @@ case "${1:-help}" in
   logs)    cmd_logs "${2:-}" ;;
   smoke)   cmd_smoke   ;;
   test)    cmd_test "${2:-}"   ;;
+  push)    cmd_push "${2:-all}" ;;
   help|*)
     echo ""
     echo -e "  ${BLD}showcase.sh${NC} — observability showcase control script"
@@ -322,14 +418,15 @@ case "${1:-help}" in
     echo "  Usage:  ./showcase.sh <command>"
     echo ""
     echo "  Commands:"
-    echo "    build           Build JARs + container images (run once, then on code changes)"
-    echo "    start           Start the full stack with podman-compose"
-    echo "    stop            Stop everything"
-    echo "    restart         stop + start"
-    echo "    status          Show container status"
-    echo "    logs [service]  Tail logs (all services, or a specific one)"
-    echo "    smoke           End-to-end curl smoke test"
-    echo "    test [module]   Run unit tests (all modules, or one: account-verifier, payment-gateway, etc.)"
+    echo "    build               Build JARs + container images (run once, then on code changes)"
+    echo "    start               Start the full stack with podman-compose"
+    echo "    stop                Stop everything"
+    echo "    restart             stop + start"
+    echo "    status              Show container status"
+    echo "    logs [service]      Tail logs (all services, or a specific one)"
+    echo "    smoke               End-to-end curl smoke test"
+    echo "    test [module]       Run unit tests (all modules, or one: account-verifier, payment-gateway, etc.)"
+    echo "    push [service]      Build + push images to quay.io/acaglio (all, or a single service)"
     echo ""
     echo "  Service names for 'logs': account-verifier, transaction-engine,"
     echo "    clearing-house, payment-gateway, spa-mobile-app, keycloak, ..."

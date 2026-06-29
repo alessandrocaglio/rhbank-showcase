@@ -6,6 +6,7 @@ import com.showcase.grpc.account.VerifyAccountResponse;
 import com.showcase.verifier.service.AccountVerificationService;
 import io.grpc.Status;
 import io.grpc.stub.StreamObserver;
+import io.opentelemetry.api.trace.Span;
 import io.quarkus.grpc.GrpcService;
 import io.vertx.core.Vertx;
 import jakarta.inject.Inject;
@@ -22,6 +23,8 @@ import java.math.BigDecimal;
  */
 @GrpcService
 public class AccountServiceGrpcImpl extends AccountServiceGrpc.AccountServiceImplBase {
+
+    private static final org.jboss.logging.Logger LOG = org.jboss.logging.Logger.getLogger(AccountServiceGrpcImpl.class);
 
     private final AccountVerificationService verificationService;
     private final Vertx vertx;
@@ -51,9 +54,10 @@ public class AccountServiceGrpcImpl extends AccountServiceGrpc.AccountServiceImp
                                 .build());
                         responseObserver.onCompleted();
                     } else {
+                        LOG.errorf(ar.cause(), "Verification failed for transactionId=%s", request.getTransactionId());
+                        Span.current().recordException(ar.cause());
                         responseObserver.onError(Status.INTERNAL
-                                .withDescription(ar.cause().getMessage())
-                                .withCause(ar.cause())
+                                .withDescription("Account verification failed. See server logs.")
                                 .asRuntimeException());
                     }
                 });
