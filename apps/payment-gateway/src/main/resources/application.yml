@@ -34,6 +34,10 @@ management:
 server:
   port: ${SERVER_PORT:8080}
 
+auth:
+  jwt:
+    bypass: ${AUTH_JWT_BYPASS:false}
+
 app:
   cors:
     allowed-origins: ${APP_CORS_ALLOWED_ORIGINS:http://localhost:3000}

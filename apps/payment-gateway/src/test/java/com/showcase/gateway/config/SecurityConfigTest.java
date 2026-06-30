@@ -218,6 +218,38 @@ class SecurityConfigTest {
     }
 
     // -------------------------------------------------------------------------
+    // JWT bypass mode — AUTH_JWT_BYPASS=true allows unauthenticated access
+    // -------------------------------------------------------------------------
+
+    @WebMvcTest(controllers = PaymentController.class)
+    @Import({SecurityConfig.class, GlobalExceptionHandler.class, MockJwtDecoderConfig.class})
+    @TestPropertySource(properties = "auth.jwt.bypass=true")
+    static class JwtBypassTest {
+
+        @Autowired
+        private MockMvc mockMvc;
+
+        @MockBean
+        private PaymentService paymentService;
+
+        @MockBean
+        private SseEmitterService sseEmitterService;
+
+        @Test
+        void postPaymentsWithoutTokenReturns202WhenBypassEnabled() throws Exception {
+            var response = new com.showcase.gateway.dto.PaymentResponse("txn-bypass", "PENDING", "Accepted");
+            when(paymentService.initiatePayment(any())).thenReturn(response);
+
+            mockMvc.perform(post("/api/v1/payments")
+                            .contentType(org.springframework.http.MediaType.APPLICATION_JSON)
+                            .content("""
+                                    {"sourceAccount":"ACC-001","destinationAccount":"ACC-002","amount":100.00,"currency":"USD"}
+                                    """))
+                    .andExpect(status().isAccepted());
+        }
+    }
+
+    // -------------------------------------------------------------------------
     // CORS wiring tests — verify that app.cors.allowed-origins is injected
     // correctly from the environment variable backing.
     // -------------------------------------------------------------------------

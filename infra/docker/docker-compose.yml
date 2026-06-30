@@ -251,6 +251,7 @@ services:
       SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK_SET_URI: http://keycloak:8080/realms/BankDemoRealm/protocol/openid-connect/certs
       SPRING_KAFKA_BOOTSTRAP_SERVERS: redpanda:29092
       GRPC_CLIENT_ACCOUNT_VERIFIER_ADDRESS: static://account-verifier:9090
+      # AUTH_JWT_BYPASS: "true"
     ports:
       - "8090:8090"
     depends_on:
