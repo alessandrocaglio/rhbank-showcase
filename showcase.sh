@@ -24,25 +24,71 @@ fail()  { echo -e "  ${RED}✗${NC} $*" >&2; }
 # ── Build ─────────────────────────────────────────────────────────────────────
 
 cmd_build() {
-  step "Building Java modules"
-  JAVA_HOME="$JAVA_HOME" "$MVNW" clean package -DskipTests
-  ok "Maven build complete"
+  local service="${1:-}"
+  local java_services=(payment-gateway account-verifier transaction-engine clearing-house)
+  local valid_services=(payment-gateway account-verifier transaction-engine clearing-house spa-mobile-app)
 
-  step "Building container images"
-  DC build
-  ok "All images built"
+  if [[ -n "$service" ]]; then
+    # Validate service name
+    local found=0
+    for svc in "${valid_services[@]}"; do
+      [[ "$svc" == "$service" ]] && { found=1; break; }
+    done
+    if [[ $found -eq 0 ]]; then
+      fail "Unknown service: '$service'"
+      echo "  Valid names: ${valid_services[*]}" >&2
+      exit 1
+    fi
+
+    # Determine if it is a Java service
+    local is_java=0
+    for svc in "${java_services[@]}"; do
+      [[ "$svc" == "$service" ]] && { is_java=1; break; }
+    done
+
+    if [[ $is_java -eq 1 ]]; then
+      step "Building Java module: $service"
+      JAVA_HOME="$JAVA_HOME" "$MVNW" clean package -pl "apps/$service" -DskipTests
+      ok "Maven build complete"
+    fi
+
+    step "Building container image: $service"
+    DC build "$service"
+    ok "Image built: $service"
+  else
+    # Full build — existing behaviour
+    step "Building Java modules"
+    JAVA_HOME="$JAVA_HOME" "$MVNW" clean package -DskipTests
+    ok "Maven build complete"
+
+    step "Building container images"
+    DC build
+    ok "All images built"
+  fi
 }
 
 jars_exist() {
+  # Optional first argument: a single Java service name.
+  # When provided, checks only that service's JAR; when absent, checks all four.
+  local filter="${1:-}"
   local missing=0
-  for jar in \
-    "$SCRIPT_DIR/apps/payment-gateway/target/payment-gateway-1.0.0-SNAPSHOT.jar" \
-    "$SCRIPT_DIR/apps/transaction-engine/target/transaction-engine-1.0.0-SNAPSHOT.jar" \
-    "$SCRIPT_DIR/apps/account-verifier/target/quarkus-app/quarkus-run.jar" \
-    "$SCRIPT_DIR/apps/clearing-house/target/quarkus-app/quarkus-run.jar"
-  do
+
+  declare -A JAR_MAP=(
+    [payment-gateway]="$SCRIPT_DIR/apps/payment-gateway/target/payment-gateway-1.0.0-SNAPSHOT.jar"
+    [transaction-engine]="$SCRIPT_DIR/apps/transaction-engine/target/transaction-engine-1.0.0-SNAPSHOT.jar"
+    [account-verifier]="$SCRIPT_DIR/apps/account-verifier/target/quarkus-app/quarkus-run.jar"
+    [clearing-house]="$SCRIPT_DIR/apps/clearing-house/target/quarkus-app/quarkus-run.jar"
+  )
+
+  if [[ -n "$filter" ]]; then
+    local jar="${JAR_MAP[$filter]:-}"
     [[ -f "$jar" ]] || { fail "Missing: $jar"; missing=1; }
-  done
+  else
+    for jar in "${JAR_MAP[@]}"; do
+      [[ -f "$jar" ]] || { fail "Missing: $jar"; missing=1; }
+    done
+  fi
+
   return $missing
 }
 
@@ -338,22 +384,39 @@ cmd_push() {
 
   # Ensure JARs exist for Java services before building images
   local java_services=(payment-gateway account-verifier transaction-engine clearing-house)
-  local need_build=0
-  for svc in "${images[@]}"; do
-    for jsvc in "${java_services[@]}"; do
-      if [[ "$svc" == "$jsvc" ]]; then
-        need_build=1
-        break
-      fi
-    done
-    [[ $need_build -eq 1 ]] && break
-  done
 
-  if [[ $need_build -eq 1 ]] && ! jars_exist 2>/dev/null; then
-    warn "JARs missing — running Maven build first..."
-    step "Building Java modules"
-    JAVA_HOME="$JAVA_HOME" "$MVNW" clean package -DskipTests
-    ok "Maven build complete"
+  if [[ "$target" == "all" ]]; then
+    # Full check: any Java service missing triggers a full build
+    local need_build=0
+    for svc in "${images[@]}"; do
+      for jsvc in "${java_services[@]}"; do
+        if [[ "$svc" == "$jsvc" ]]; then
+          need_build=1
+          break
+        fi
+      done
+      [[ $need_build -eq 1 ]] && break
+    done
+
+    if [[ $need_build -eq 1 ]] && ! jars_exist 2>/dev/null; then
+      warn "JARs missing — running Maven build first..."
+      step "Building Java modules"
+      JAVA_HOME="$JAVA_HOME" "$MVNW" clean package -DskipTests
+      ok "Maven build complete"
+    fi
+  else
+    # Single-service push: check and build only the targeted Java service (if applicable)
+    local is_java=0
+    for jsvc in "${java_services[@]}"; do
+      [[ "$jsvc" == "$target" ]] && { is_java=1; break; }
+    done
+
+    if [[ $is_java -eq 1 ]] && ! jars_exist "$target" 2>/dev/null; then
+      warn "JAR missing for $target — running targeted Maven build first..."
+      step "Building Java module: $target"
+      JAVA_HOME="$JAVA_HOME" "$MVNW" clean package -pl "apps/$target" -DskipTests
+      ok "Maven build complete"
+    fi
   fi
 
   local built=() failed_build=() failed_push=()
@@ -402,7 +465,7 @@ cmd_push() {
 
 # ── Dispatch ──────────────────────────────────────────────────────────────────
 case "${1:-help}" in
-  build)   cmd_build   ;;
+  build)   cmd_build "${2:-}" ;;
   start)   cmd_start   ;;
   stop)    cmd_stop    ;;
   restart) cmd_restart ;;
@@ -418,7 +481,7 @@ case "${1:-help}" in
     echo "  Usage:  ./showcase.sh <command>"
     echo ""
     echo "  Commands:"
-    echo "    build               Build JARs + container images (run once, then on code changes)"
+    echo "    build [service]         Build JARs + container image (all services, or one: payment-gateway, etc.)"
     echo "    start               Start the full stack with podman-compose"
     echo "    stop                Stop everything"
     echo "    restart             stop + start"
