@@ -36,8 +36,6 @@ spec:
               value: "tracecontext,baggage"
             - name: OTEL_SERVICE_NAME
               value: "payment-gateway"
-            - name: SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI
-              value: "http://keycloak:8080/realms/BankDemoRealm"
             - name: SPRING_KAFKA_BOOTSTRAP_SERVERS
               value: "redpanda:9092"
             - name: SPRING_KAFKA_CONSUMER_GROUP_ID
