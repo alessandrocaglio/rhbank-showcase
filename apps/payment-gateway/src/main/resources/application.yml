@@ -1,12 +1,6 @@
 spring:
   application:
     name: payment-gateway
-  security:
-    oauth2:
-      resourceserver:
-        jwt:
-          issuer-uri: ${SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI:http://localhost:8080/realms/BankDemoRealm}
-          jwk-set-uri: ${SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK_SET_URI:}
   kafka:
     bootstrap-servers: ${SPRING_KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
     consumer:
@@ -33,10 +27,6 @@ management:
 
 server:
   port: ${SERVER_PORT:8080}
-
-auth:
-  jwt:
-    bypass: ${AUTH_JWT_BYPASS:false}
 
 app:
   cors:
