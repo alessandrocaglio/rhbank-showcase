@@ -12,6 +12,8 @@ spec:
     metadata:
       labels:
         app: payment-gateway
+      annotations:
+        instrumentation.opentelemetry.io/inject-java: "true"
     spec:
       containers:
         - name: payment-gateway
@@ -20,22 +22,6 @@ spec:
           ports:
             - containerPort: 8080
           env:
-            - name: JAVA_TOOL_OPTIONS
-              value: "-javaagent:/opt/otel/opentelemetry-javaagent.jar"
-            - name: OTEL_TRACES_EXPORTER
-              value: "otlp"
-            - name: OTEL_EXPORTER_OTLP_PROTOCOL
-              value: "grpc"
-            - name: OTEL_EXPORTER_OTLP_ENDPOINT
-              value: "http://otel-collector:4317"
-            - name: OTEL_METRICS_EXPORTER
-              value: "none"
-            - name: OTEL_LOGS_EXPORTER
-              value: "none"
-            - name: OTEL_PROPAGATORS
-              value: "tracecontext,baggage"
-            - name: OTEL_SERVICE_NAME
-              value: "payment-gateway"
             - name: SPRING_KAFKA_BOOTSTRAP_SERVERS
               value: "redpanda:9092"
             - name: SPRING_KAFKA_CONSUMER_GROUP_ID
