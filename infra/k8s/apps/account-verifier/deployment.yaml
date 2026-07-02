@@ -12,6 +12,8 @@ spec:
     metadata:
       labels:
         app: account-verifier
+      annotations:
+        instrumentation.opentelemetry.io/inject-java: "true"
     spec:
       containers:
         - name: account-verifier
@@ -23,22 +25,6 @@ spec:
             - name: http
               containerPort: 8080
           env:
-            - name: JAVA_TOOL_OPTIONS
-              value: "-javaagent:/opt/otel/opentelemetry-javaagent.jar"
-            - name: OTEL_TRACES_EXPORTER
-              value: "otlp"
-            - name: OTEL_EXPORTER_OTLP_PROTOCOL
-              value: "grpc"
-            - name: OTEL_EXPORTER_OTLP_ENDPOINT
-              value: "http://otel-collector:4317"
-            - name: OTEL_METRICS_EXPORTER
-              value: "none"
-            - name: OTEL_LOGS_EXPORTER
-              value: "none"
-            - name: OTEL_PROPAGATORS
-              value: "tracecontext,baggage"
-            - name: OTEL_SERVICE_NAME
-              value: "account-verifier"
             - name: QUARKUS_DATASOURCE_JDBC_URL
               value: "jdbc:postgresql://postgres:5432/accounts_db"
             - name: QUARKUS_DATASOURCE_USERNAME

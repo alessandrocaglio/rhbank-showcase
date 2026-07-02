@@ -116,11 +116,6 @@
                         <from>
                             <image>registry.access.redhat.com/ubi9/openjdk-21-runtime:latest</image>
                         </from>
-                        <container>
-                            <environment>
-                                <JAVA_TOOL_OPTIONS>-javaagent:/opt/otel/opentelemetry-javaagent.jar</JAVA_TOOL_OPTIONS>
-                            </environment>
-                        </container>
                     </configuration>
                 </plugin>
             </plugins>
