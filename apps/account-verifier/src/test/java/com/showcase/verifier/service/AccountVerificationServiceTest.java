@@ -12,8 +12,11 @@ import org.junit.jupiter.api.Test;
 import java.math.BigDecimal;
 import java.util.Optional;
 
+import org.mockito.ArgumentCaptor;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
@@ -94,6 +97,19 @@ class AccountVerificationServiceTest {
         service.verify("txn-001", "ACC-001", "ACC-002", new BigDecimal("150.00"), "USD");
 
         verify(outboxRepository).persist(any(OutboxMessage.class));
+    }
+
+    @Test
+    void shouldPersistOutboxEntryWithNullTraceparentWhenNoOtelContextActive() {
+        Account account = createAccount("ACC-001", "Alice Martin", new BigDecimal("1000.00"), "ACTIVE");
+        when(accountRepository.findByAccountIdForUpdate("ACC-001")).thenReturn(Optional.of(account));
+
+        service.verify("txn-ctx-null", "ACC-001", "ACC-002", new BigDecimal("100.00"), "USD");
+
+        ArgumentCaptor<OutboxMessage> captor = ArgumentCaptor.forClass(OutboxMessage.class);
+        verify(outboxRepository).persist(captor.capture());
+        assertNull(captor.getValue().traceparent,
+            "traceparent must be null when no OTel context is active in the test environment");
     }
 
     @Test

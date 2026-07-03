@@ -6,13 +6,17 @@ import com.showcase.verifier.dto.VerificationResult;
 import com.showcase.verifier.outbox.OutboxMessage;
 import com.showcase.verifier.outbox.OutboxRepository;
 import com.showcase.verifier.repository.AccountRepository;
+import io.opentelemetry.api.GlobalOpenTelemetry;
 import io.opentelemetry.api.trace.Span;
 import io.opentelemetry.api.trace.StatusCode;
+import io.opentelemetry.context.Context;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
 
 import java.math.BigDecimal;
+import java.util.HashMap;
+import java.util.Map;
 
 @ApplicationScoped
 public class AccountVerificationService {
@@ -97,7 +101,13 @@ public class AccountVerificationService {
             // The OutboxPoller will read this row and publish to Kafka asynchronously.
             try {
                 String payload = objectMapper.writeValueAsString(event);
-                outboxRepository.persist(OutboxMessage.of("payment-approved", payload));
+                Map<String, String> propagationCarrier = new HashMap<>();
+                GlobalOpenTelemetry.getPropagators()
+                    .getTextMapPropagator()
+                    .inject(Context.current(), propagationCarrier, Map::put);
+                String traceparent = propagationCarrier.get("traceparent");
+                String tracestate  = propagationCarrier.get("tracestate");
+                outboxRepository.persist(OutboxMessage.of("payment-approved", payload, traceparent, tracestate));
             } catch (Exception ex) {
                 throw new RuntimeException("Failed to serialize payment event to outbox", ex);
             }
