@@ -62,7 +62,7 @@ public class OutboxPoller {
                 msg.sent   = true;
                 msg.sentAt = Instant.now();
             } catch (Exception e) {
-                Log.errorf(e, "Failed to publish outbox message id=%d, will retry", msg.id);
+                Log.errorf(e, "Failed to publish outbox message id=%s, will retry", msg.id);
             }
         }
     }
