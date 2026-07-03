@@ -26,16 +26,20 @@ public class OutboxMessage extends PanacheEntity {
     @Column(name = "sent_at")
     public Instant sentAt;
 
-    /**
-     * Static factory method — the only way to create an OutboxMessage from application code.
-     * Panache requires the no-arg constructor to remain accessible (inherited from PanacheEntity).
-     */
-    public static OutboxMessage of(String topic, String payload) {
+    @Column(name = "traceparent", length = 55)
+    public String traceparent;
+
+    @Column(name = "tracestate", length = 512)
+    public String tracestate;
+
+    public static OutboxMessage of(String topic, String payload, String traceparent, String tracestate) {
         OutboxMessage msg = new OutboxMessage();
-        msg.topic = topic;
-        msg.payload = payload;
-        msg.createdAt = Instant.now();
-        msg.sent = false;
+        msg.topic       = topic;
+        msg.payload     = payload;
+        msg.createdAt   = Instant.now();
+        msg.sent        = false;
+        msg.traceparent = traceparent;
+        msg.tracestate  = tracestate;
         return msg;
     }
 }
